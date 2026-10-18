@@ -5,6 +5,7 @@ const path = require("path");
 const crypto = require("crypto");
 const { readJson, writeJsonAtomic } = require("./lib/store");
 const { validateProfile } = require("./lib/profile");
+const { geocode, drive } = require("./lib/geo");
 
 const STATUSES = ["candidate", "contacted", "replied", "call", "viewing", "declined", "dropped", "bought"];
 const LISTING_FIELDS = ["title", "shortName", "displayTitle", "make", "model", "fuel", "engine", "facelift", "variant", "trim", "colour", "price", "negotiable", "km", "regMonth", "regYear", "hp", "gearbox", "dsgType", "hu", "owners", "serviceHistory", "timingBelt", "dsgOil", "docsReview", "carplay", "carplayStatus", "camera", "location", "city", "distanceKm", "airKm", "roadKm", "driveMin", "transitMin", "transitCheckedAt", "transitSource", "transitDestination", "transitApproximate", "lat", "lon", "bahnUrl", "mapsUrl", "sellerName", "sellerType", "phone", "url", "kleinanzeigenUrl", "photos", "verdict", "pros", "cons", "questions", "i18n", "equip", "score", "rating", "replyAssessment", "visit", "order", "addedAt", "lastSeenAt", "priceHistory", "gone"];
@@ -80,6 +81,53 @@ function createApp(options = {}) {
     state.profile = value;
     try { await writeJsonAtomic(files.profile, value); res.json({ ok: true, profile: value }); }
     catch (e) { res.status(500).json({ error: "save failed" }); }
+  });
+
+  const slug = s => String(s).normalize("NFKD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/ß/g, "ss").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 70);
+
+  app.get("/api/geocode", async (req, res) => {
+    const q = String(req.query.q || "").trim();
+    if (!q || q.length > 200) return res.status(400).json({ error: "query expected" });
+    try { const g = await geocode(q, app.locals.fetchImpl); g ? res.json(g) : res.status(404).json({ error: "not found" }); }
+    catch (e) { res.status(502).json({ error: "geocoding failed" }); }
+  });
+
+  app.post("/api/cars", async (req, res) => {
+    const b = req.body || {}, errors = [];
+    const s = (k, max, opt) => { if (opt && (b[k] == null || b[k] === "")) return; if (typeof b[k] !== "string" || !b[k].trim() || b[k].length > max) errors.push(`${k}: text expected`); };
+    const n = (k, min, max, opt) => { if (opt && b[k] == null) return; if (!Number.isInteger(b[k]) || b[k] < min || b[k] > max) errors.push(`${k}: whole number ${min}–${max} expected`); };
+    s("title", 120); s("town", 120); s("notes", 5000, true);
+    if (typeof b.url !== "string" || !/^https:\/\/[^\s]{4,500}$/.test(b.url)) errors.push("url: https link expected");
+    n("price", 0, 1000000); n("km", 0, 2000000); n("regYear", 1980, 2100); n("regMonth", 1, 12, true); n("hp", 1, 2000, true);
+    if (!["diesel", "petrol", "hybrid", "plugin", "electric", "lpg"].includes(b.fuel)) errors.push("fuel: unknown");
+    if (!["automatic", "manual"].includes(b.gearbox)) errors.push("gearbox: automatic or manual expected");
+    if (errors.length) return res.status(400).json({ error: "invalid car", details: errors });
+
+    let id = slug(b.title + " " + b.town) || "car";
+    if (state.cars[id]) { let i = 2; while (state.cars[`${id}-${i}`]) i++; id = `${id}-${i}`; }
+    const d = today();
+    const car = {
+      title: b.title.trim(), displayTitle: `${b.title.trim()} · ${b.regYear}`, model: b.title.trim(), fuel: b.fuel,
+      gearbox: b.gearbox === "automatic" ? "Automatic" : "Manual", price: b.price, km: b.km, regYear: b.regYear, regMonth: b.regMonth || 1,
+      hp: b.hp || null, location: b.town.trim(), city: b.town.trim(), url: b.url, photos: [],
+      status: "candidate", pick: false, notes: b.notes || "", nextStep: "", messages: [], addedAt: d, lastSeenAt: d, priceHistory: [{ date: d, price: b.price }]
+    };
+    try {
+      const where = await geocode(b.town, app.locals.fetchImpl);
+      if (where) {
+        car.lat = where.lat; car.lon = where.lon;
+        const home = state.profile && state.profile.home;
+        if (home) {
+          const r = await drive(home, where, app.locals.fetchImpl);
+          if (r) Object.assign(car, r);
+          car.mapsUrl = "https://www.google.com/maps/dir/?api=1&origin=" + encodeURIComponent(home.label) + `&destination=${where.lat},${where.lon}`;
+        }
+      }
+    } catch (e) { /* distance stays empty */ }
+    state.cars[id] = car;
+    state.meta.log.unshift({ date: d, type: "new", id, text: car.displayTitle, price: car.price });
+    try { await persist(); } catch (e) { return res.status(500).json({ error: "save failed" }); }
+    res.status(201).json({ ok: true, id, car });
   });
 
   app.put("/api/img/:name", requireKey, express.raw({ type: ["image/jpeg", "image/png", "image/webp"], limit: "5mb" }), async (req, res) => {

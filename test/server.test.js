@@ -106,3 +106,46 @@ test("photos upload to DATA_DIR/img and are served from /img", async () => {
     assert.deepEqual(Buffer.from(await got.arrayBuffer()), jpeg);
   } finally { await s.close(); }
 });
+
+const geoFetch = async url => ({ ok: true, status: 200, json: async () => url.includes("nominatim") ? [{ display_name: "45127 Essen", lat: "51.4556", lon: "7.0116" }] : { routes: [{ distance: 36000, duration: 1920 }] } });
+const failFetch = async () => { throw new Error("offline"); };
+const homeProfile = () => { const p = defaultProfile(); p.home = { label: "Königsallee 1, 40212 Düsseldorf", lat: 51.2254, lon: 6.7787 }; return p; };
+const newCar = { url: "https://suchen.mobile.de/fahrzeuge/details.html?id=123", title: "VW Golf 7 Variant 2.0 TDI", price: 9900, km: 150000, regYear: 2016, fuel: "diesel", gearbox: "automatic", town: "45127 Essen" };
+
+test("manual add geocodes the town and computes the drive", async () => {
+  const s = await start({ fetchImpl: geoFetch });
+  try {
+    await fetch(s.base + "/api/profile", { method: "PUT", headers: json(s.auth), body: JSON.stringify(homeProfile()) });
+    const r = await fetch(s.base + "/api/cars", { method: "POST", headers: json(s.auth), body: JSON.stringify(newCar) });
+    assert.equal(r.status, 201);
+    const { id, car } = await r.json();
+    assert.equal(id, "vw-golf-7-variant-2-0-tdi-45127-essen");
+    assert.equal(car.driveMin, 32);
+    assert.equal(car.roadKm, 36);
+    assert.equal(car.status, "candidate");
+    const again = await (await fetch(s.base + "/api/cars", { method: "POST", headers: json(s.auth), body: JSON.stringify(newCar) })).json();
+    assert.equal(again.id, id + "-2");
+  } finally { await s.close(); }
+});
+
+test("manual add still saves when geocoding fails, and validates input", async () => {
+  const s = await start({ fetchImpl: failFetch });
+  try {
+    await fetch(s.base + "/api/profile", { method: "PUT", headers: json(s.auth), body: JSON.stringify(homeProfile()) });
+    const r = await fetch(s.base + "/api/cars", { method: "POST", headers: json(s.auth), body: JSON.stringify(newCar) });
+    assert.equal(r.status, 201);
+    assert.equal((await r.json()).car.driveMin, undefined);
+    const bad = await fetch(s.base + "/api/cars", { method: "POST", headers: json(s.auth), body: JSON.stringify({ ...newCar, price: "cheap", url: "javascript:alert(1)" }) });
+    assert.equal(bad.status, 400);
+    assert.equal((await bad.json()).details.length, 2);
+  } finally { await s.close(); }
+});
+
+test("geocode endpoint", async () => {
+  const s = await start({ fetchImpl: geoFetch });
+  try {
+    const r = await fetch(s.base + "/api/geocode?q=Essen", { headers: s.auth });
+    assert.equal(r.status, 200);
+    assert.equal((await r.json()).lat, 51.4556);
+  } finally { await s.close(); }
+});
