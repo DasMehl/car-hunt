@@ -48,6 +48,8 @@ function createApp(options = {}) {
     next();
   });
 
+  app.get("/healthz", (req, res) => res.type("text").send("ok"));
+
   if (password) {
     app.use((req, res, next) => {
       const [scheme, b64] = (req.headers.authorization || "").split(" ");
@@ -92,11 +94,15 @@ function createApp(options = {}) {
     state.cars[id] = prev ? { ...prev, ...listing } : { status: "candidate", pick: false, notes: "", nextStep: "", messages: [], addedAt: today(), ...listing };
     if (!prev && typeof incoming.pick === "boolean") state.cars[id].pick = incoming.pick;
     if (!prev) state.meta.log.unshift({ date: today(), type: "new", id, text: state.cars[id].displayTitle || state.cars[id].title, price: state.cars[id].price });
-    await persist();
+    try { await persist(); } catch (e) { return res.status(500).json({ error: "save failed" }); }
     res.json({ ok: true, created: !prev });
   });
 
-  app.put("/api/meta", requireKey, async (req, res) => { Object.assign(state.meta, req.body || {}); await persist(); res.json({ ok: true, meta: state.meta }); });
+  app.put("/api/meta", requireKey, async (req, res) => {
+    Object.assign(state.meta, req.body || {});
+    try { await persist(); } catch (e) { return res.status(500).json({ error: "save failed" }); }
+    res.json({ ok: true, meta: state.meta });
+  });
 
   app.post("/api/sync", requireKey, async (req, res) => {
     const seen = (req.body && req.body.seen) || {}, d = today(), changes = [];
@@ -113,7 +119,7 @@ function createApp(options = {}) {
     }
     state.meta.lastCheck = req.body.checkedAt || new Date().toISOString();
     state.meta.log = [...changes, ...state.meta.log].slice(0, 200);
-    await persist();
+    try { await persist(); } catch (e) { return res.status(500).json({ error: "save failed" }); }
     res.json({ ok: true, changes });
   });
 

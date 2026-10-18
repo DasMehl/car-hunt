@@ -49,3 +49,29 @@ test("bulk writes need the sync key", async () => {
     assert.equal((await fetch(s.base + "/api/sync", { method: "POST", headers: s.sync, body: JSON.stringify({ seen: {}, complete: false }) })).status, 200);
   } finally { await s.close(); }
 });
+
+test("/healthz is the only route open without the password", async () => {
+  const s = await start();
+  try {
+    const h = await fetch(s.base + "/healthz");
+    assert.equal(h.status, 200);
+    assert.equal(await h.text(), "ok");
+    assert.equal((await fetch(s.base + "/api/cars")).status, 401);
+  } finally { await s.close(); }
+});
+
+test("a failing save answers 500 and the server keeps running", async () => {
+  const s = await start();
+  try {
+    fs.rmSync(path.join(s.dir, "cars.json"));
+    fs.mkdirSync(path.join(s.dir, "cars.json")); // renaming a file onto a directory fails
+    const put = await fetch(s.base + "/api/cars/demo", { method: "PUT", headers: s.sync, body: JSON.stringify({ title: "Demo" }) });
+    assert.equal(put.status, 500);
+    assert.deepEqual(await put.json(), { error: "save failed" });
+    const meta = await fetch(s.base + "/api/meta", { method: "PUT", headers: s.sync, body: JSON.stringify({ x: 1 }) });
+    assert.equal(meta.status, 500);
+    const sync = await fetch(s.base + "/api/sync", { method: "POST", headers: s.sync, body: JSON.stringify({ seen: {}, complete: false }) });
+    assert.equal(sync.status, 500);
+    assert.equal((await fetch(s.base + "/api/meta", { headers: s.auth })).status, 200);
+  } finally { await s.close(); }
+});
