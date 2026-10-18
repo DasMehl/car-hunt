@@ -87,6 +87,39 @@ function createApp(options = {}) {
     catch (e) { res.status(500).json({ error: "save failed" }); }
   });
 
+  // Validates listing facts as the add-car dialog sends them. With partial, every field is optional
+  // and only the ones present are checked (PATCH /api/cars/:id/listing).
+  function checkListing(b, partial) {
+    const errors = [], has = k => !partial || k in b;
+    const s = (k, max, opt) => { if (!has(k) || (opt && (b[k] == null || b[k] === ""))) return; if (typeof b[k] !== "string" || !b[k].trim() || b[k].length > max) errors.push(`${k}: text expected`); };
+    const n = (k, min, max, opt) => { if (!has(k) || (opt && b[k] == null)) return; if (!Number.isInteger(b[k]) || b[k] < min || b[k] > max) errors.push(`${k}: whole number ${min}–${max} expected`); };
+    s("title", 120); s("town", 120); s("notes", 5000, true);
+    if (has("url") && (typeof b.url !== "string" || !/^https:\/\/[^\s]{4,500}$/.test(b.url))) errors.push("url: https link expected");
+    n("price", 0, 1000000); n("km", 0, 2000000); n("regYear", 1980, 2100); n("regMonth", 1, 12, true); n("hp", 1, 2000, true);
+    if (has("fuel") && !["diesel", "petrol", "hybrid", "plugin", "electric", "lpg"].includes(b.fuel)) errors.push("fuel: unknown");
+    if (has("gearbox") && !["automatic", "manual"].includes(b.gearbox)) errors.push("gearbox: automatic or manual expected");
+    if ("negotiable" in b && typeof b.negotiable !== "boolean") errors.push("negotiable: true or false expected");
+    return errors;
+  }
+
+  // Coordinates, drive from home and route link for a town; fields stay absent when lookup fails.
+  async function locate(town) {
+    const out = {};
+    try {
+      const where = await geocode(town, app.locals.fetchImpl);
+      if (where) {
+        out.lat = where.lat; out.lon = where.lon;
+        const home = state.profile && state.profile.home;
+        if (home) {
+          const r = await drive(home, where, app.locals.fetchImpl);
+          if (r) Object.assign(out, r);
+          out.mapsUrl = "https://www.google.com/maps/dir/?api=1&origin=" + encodeURIComponent(home.label) + `&destination=${where.lat},${where.lon}`;
+        }
+      }
+    } catch (e) { /* distance stays empty */ }
+    return out;
+  }
+
   const slug = s => String(s).normalize("NFKD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/ß/g, "ss").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 70);
 
   app.get("/api/geocode", async (req, res) => {
@@ -97,14 +130,7 @@ function createApp(options = {}) {
   });
 
   app.post("/api/cars", async (req, res) => {
-    const b = req.body || {}, errors = [];
-    const s = (k, max, opt) => { if (opt && (b[k] == null || b[k] === "")) return; if (typeof b[k] !== "string" || !b[k].trim() || b[k].length > max) errors.push(`${k}: text expected`); };
-    const n = (k, min, max, opt) => { if (opt && b[k] == null) return; if (!Number.isInteger(b[k]) || b[k] < min || b[k] > max) errors.push(`${k}: whole number ${min}–${max} expected`); };
-    s("title", 120); s("town", 120); s("notes", 5000, true);
-    if (typeof b.url !== "string" || !/^https:\/\/[^\s]{4,500}$/.test(b.url)) errors.push("url: https link expected");
-    n("price", 0, 1000000); n("km", 0, 2000000); n("regYear", 1980, 2100); n("regMonth", 1, 12, true); n("hp", 1, 2000, true);
-    if (!["diesel", "petrol", "hybrid", "plugin", "electric", "lpg"].includes(b.fuel)) errors.push("fuel: unknown");
-    if (!["automatic", "manual"].includes(b.gearbox)) errors.push("gearbox: automatic or manual expected");
+    const b = req.body || {}, errors = checkListing(b);
     if (errors.length) return res.status(400).json({ error: "invalid car", details: errors });
 
     const d = today();
@@ -114,18 +140,7 @@ function createApp(options = {}) {
       hp: b.hp ?? null, location: b.town.trim(), city: b.town.trim(), url: b.url, photos: [], source: "manual",
       status: "candidate", pick: false, notes: b.notes || "", nextStep: "", messages: [], addedAt: d, lastSeenAt: d, priceHistory: [{ date: d, price: b.price }]
     };
-    try {
-      const where = await geocode(b.town, app.locals.fetchImpl);
-      if (where) {
-        car.lat = where.lat; car.lon = where.lon;
-        const home = state.profile && state.profile.home;
-        if (home) {
-          const r = await drive(home, where, app.locals.fetchImpl);
-          if (r) Object.assign(car, r);
-          car.mapsUrl = "https://www.google.com/maps/dir/?api=1&origin=" + encodeURIComponent(home.label) + `&destination=${where.lat},${where.lon}`;
-        }
-      }
-    } catch (e) { /* distance stays empty */ }
+    Object.assign(car, await locate(b.town));
     // Id is chosen and stored synchronously, after the last await, so concurrent adds cannot share one.
     let id = slug(b.title + " " + b.town) || "car";
     if (state.cars[id]) { let i = 2; while (state.cars[`${id}-${i}`]) i++; id = `${id}-${i}`; }
@@ -165,6 +180,72 @@ function createApp(options = {}) {
     if ("messages" in p && (!Array.isArray(p.messages) || p.messages.length > 200 || p.messages.some(m => !m || typeof m !== "object" || typeof m.text !== "string" || m.text.length > 10000))) return res.status(400).json({ error: "invalid messages" });
     for (const k of allowed) if (k in p) c[k] = p[k];
     try { await persist(); res.json({ ok: true, car: c }); } catch (e) { res.status(500).json({ error: "save failed" }); }
+  });
+
+  const EDITABLE = ["url", "title", "price", "km", "regYear", "regMonth", "hp", "fuel", "gearbox", "town", "negotiable"];
+  // Fields that describe where the car is; a new town makes all of them stale.
+  const PLACE_FIELDS = ["lat", "lon", "roadKm", "driveMin", "mapsUrl", "distanceKm", "airKm", "transitMin", "transitCheckedAt", "transitSource", "transitDestination", "transitApproximate", "bahnUrl"];
+
+  app.patch("/api/cars/:id/listing", async (req, res) => {
+    const id = req.params.id, p = req.body;
+    if (!state.cars[id]) return res.status(404).json({ error: "unknown car" });
+    if (!p || typeof p !== "object" || Array.isArray(p)) return res.status(400).json({ error: "invalid update" });
+    if (Object.keys(p).some(k => !EDITABLE.includes(k))) return res.status(400).json({ error: "unsupported field" });
+    const errors = checkListing(p, true);
+    if (errors.length) return res.status(400).json({ error: "invalid car", details: errors });
+    const place = "town" in p ? await locate(p.town.trim()) : null;
+    // Everything below runs without awaiting, so a concurrent delete or edit cannot interleave.
+    const c = state.cars[id];
+    if (!c) return res.status(404).json({ error: "unknown car" });
+    const prev = structuredClone(c), d = today();
+    const manual = c.source === "manual";
+    for (const k of ["url", "km", "regYear", "regMonth", "hp", "fuel", "negotiable"]) if (k in p) c[k] = p[k];
+    if ("gearbox" in p) c.gearbox = p.gearbox === "automatic" ? "Automatic" : "Manual";
+    if ("title" in p) { c.title = p.title.trim(); if (manual) c.model = c.title; }
+    if ("title" in p || (manual && "regYear" in p)) c.displayTitle = c.regYear ? `${c.title} · ${c.regYear}` : c.title;
+    let entry = null;
+    if ("price" in p && p.price !== c.price) {
+      entry = { date: d, type: "price", id, text: c.displayTitle || c.title, from: c.price ?? null, to: p.price };
+      c.priceHistory = [...(c.priceHistory || []), { date: d, price: p.price }];
+      c.price = p.price;
+      state.meta.log.unshift(entry);
+    }
+    if (place) {
+      c.location = c.city = p.town.trim();
+      for (const k of PLACE_FIELDS) delete c[k];
+      Object.assign(c, place);
+    }
+    try { await persist(); }
+    catch (e) {
+      if (state.cars[id] === c) state.cars[id] = prev;
+      const at = entry ? state.meta.log.indexOf(entry) : -1;
+      if (at >= 0) state.meta.log.splice(at, 1);
+      return res.status(500).json({ error: "save failed" });
+    }
+    res.json({ ok: true, car: c });
+  });
+
+  app.delete("/api/cars/:id", async (req, res) => {
+    const id = req.params.id, c = state.cars[id];
+    if (!c) return res.status(404).json({ error: "unknown car" });
+    const log = state.meta.log;
+    delete state.cars[id];
+    state.meta.log = log.filter(e => e.id !== id);
+    try { await persist(); }
+    catch (e) {
+      if (!state.cars[id]) state.cars[id] = c;
+      if (state.meta.log.every(e => e.id !== id)) state.meta.log = [...state.meta.log, ...log.filter(e => e.id === id)].sort((a, b) => log.indexOf(a) - log.indexOf(b));
+      return res.status(500).json({ error: "save failed" });
+    }
+    // Photos are named <id>-N; skip files of another car whose id itself starts with "<id>-".
+    const img = path.join(dataDir, "img"), others = Object.keys(state.cars).filter(o => o.startsWith(id + "-"));
+    try {
+      for (const f of await fs.promises.readdir(img)) {
+        if (!f.startsWith(id + "-") || others.some(o => f.startsWith(o + "-"))) continue;
+        await fs.promises.unlink(path.join(img, f)).catch(() => {});
+      }
+    } catch (e) { /* photos stay behind; the car is gone */ }
+    res.json({ ok: true });
   });
 
   app.put("/api/cars/:id", requireKey, async (req, res) => {
