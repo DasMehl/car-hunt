@@ -21,7 +21,7 @@
       eq: { carplay: "CarPlay", camera: "Rear camera", acc: "Adaptive cruise", ahk: "Tow hitch", led: "LED/Xenon", pano: "Panorama roof", navi: "Navigation", seatheat: "Heated seats" },
       w: { km: "Mileage & age", docs: "Maintenance records", gearbox: "Gearbox risk", seller: "Seller & warranty", price: "Price", distance: "Distance", equip: "Equipment" },
       lang: { en: "English", de: "Deutsch", pt: "Português" },
-      add: "Add a car", url: "Listing link", title: "Make and model", price: "Price (€)", km: "Mileage (km)", year: "First registration year", town: "Postcode and town", notes: "Notes", hp: "Power (hp, optional)", added: "Car added", homeNeeded: "Please find your home address first."
+      add: "Add a car", url: "Listing link", title: "Make and model", price: "Price (€)", km: "Mileage (km)", year: "First registration year", town: "Postcode and town", notes: "Notes", hp: "Power (hp, optional)", added: "Car added", homeNeeded: "Please find your home address first.", loadFail: "Could not load the drivetrain list; you can still save.", needNumber: "Please enter a number for:", netFail: "Could not reach the server:", customOn: "Avoid"
     },
     de: {
       wizard: "Autosuche einrichten", settings: "Einstellungen", next: "Weiter", back: "Zurück", save: "Speichern", cancel: "Abbrechen", finish: "Los geht’s",
@@ -39,7 +39,7 @@
       eq: { carplay: "CarPlay", camera: "Rückfahrkamera", acc: "Abstandstempomat", ahk: "Anhängerkupplung", led: "LED/Xenon", pano: "Panoramadach", navi: "Navi", seatheat: "Sitzheizung" },
       w: { km: "Laufleistung & Alter", docs: "Wartungsnachweise", gearbox: "Getrieberisiko", seller: "Verkäufer & Gewährleistung", price: "Preis", distance: "Entfernung", equip: "Ausstattung" },
       lang: { en: "English", de: "Deutsch", pt: "Português" },
-      add: "Auto hinzufügen", url: "Link zum Inserat", title: "Marke und Modell", price: "Preis (€)", km: "Kilometerstand", year: "Erstzulassung (Jahr)", town: "PLZ und Ort", notes: "Notizen", hp: "Leistung (PS, optional)", added: "Auto hinzugefügt", homeNeeded: "Bitte zuerst die Wohnadresse suchen."
+      add: "Auto hinzufügen", url: "Link zum Inserat", title: "Marke und Modell", price: "Preis (€)", km: "Kilometerstand", year: "Erstzulassung (Jahr)", town: "PLZ und Ort", notes: "Notizen", hp: "Leistung (PS, optional)", added: "Auto hinzugefügt", homeNeeded: "Bitte zuerst die Wohnadresse suchen.", loadFail: "Die Liste der Antriebe konnte nicht geladen werden; Speichern geht trotzdem.", needNumber: "Bitte eine Zahl eingeben für:", netFail: "Server nicht erreichbar:", customOn: "Meiden"
     },
     pt: {
       wizard: "Configure sua busca", settings: "Configurações", next: "Próximo", back: "Voltar", save: "Salvar", cancel: "Cancelar", finish: "Começar",
@@ -57,7 +57,7 @@
       eq: { carplay: "CarPlay", camera: "Câmera de ré", acc: "Piloto adaptativo", ahk: "Engate", led: "LED/Xenon", pano: "Teto panorâmico", navi: "Navegação", seatheat: "Bancos aquecidos" },
       w: { km: "Quilometragem e idade", docs: "Histórico de manutenção", gearbox: "Risco do câmbio", seller: "Vendedor e garantia", price: "Preço", distance: "Distância", equip: "Equipamentos" },
       lang: { en: "English", de: "Deutsch", pt: "Português" },
-      add: "Adicionar carro", url: "Link do anúncio", title: "Marca e modelo", price: "Preço (€)", km: "Quilometragem (km)", year: "Ano do primeiro registro", town: "CEP e cidade", notes: "Anotações", hp: "Potência (cv, opcional)", added: "Carro adicionado", homeNeeded: "Busque primeiro o endereço de casa."
+      add: "Adicionar carro", url: "Link do anúncio", title: "Marca e modelo", price: "Preço (€)", km: "Quilometragem (km)", year: "Ano do primeiro registro", town: "CEP e cidade", notes: "Anotações", hp: "Potência (cv, opcional)", added: "Carro adicionado", homeNeeded: "Busque primeiro o endereço de casa.", loadFail: "Não foi possível carregar a lista de motores; ainda dá para salvar.", needNumber: "Informe um número para:", netFail: "Não foi possível falar com o servidor:", customOn: "Evitar"
     }
   };
 
@@ -69,8 +69,13 @@
   // Field builders return [element, read()] where read() writes the value into the profile.
   function text(t, p, path, label, type = "text") { const i = el("input", { type, value: get(p, path) ?? "" }); return [el("label", {}, t[label] || label, i), () => set(p, path, i.value.trim())]; }
   function number(t, p, path, label, opts = {}) {
-    const v = get(p, path); const i = el("input", { type: "number", value: v ?? "", min: opts.min, max: opts.max, step: opts.step || 1 });
-    return [el("label", {}, t[label] || label, i), () => { const raw = i.value.trim(); set(p, path, raw === "" && opts.nullable ? null : Number(raw)); }];
+    const v = get(p, path); const i = el("input", { type: "number", value: v ?? "", min: opts.min, max: opts.max, step: opts.step || 1, required: !opts.nullable });
+    return [el("label", {}, t[label] || label, i), () => {
+      const raw = i.value.trim();
+      if (raw === "" && opts.nullable) { set(p, path, null); return; }
+      if (raw === "" || !Number.isFinite(Number(raw))) return t[label] || label; // reported by readStep, profile left unchanged
+      set(p, path, Number(raw));
+    }];
   }
   function check(t, p, path, label) { const i = el("input", { type: "checkbox" }); i.checked = !!get(p, path); return [el("div", { class: "opts" }, el("label", {}, i, t[label] || label)), () => set(p, path, i.checked)]; }
   function multi(t, p, path, label, options, names) {
@@ -87,9 +92,11 @@
     const i = el("input", { type: "text", value: p.home ? p.home.label : "" }); const out = el("p", { class: "hint", text: p.home ? `${t.found} ${p.home.label}` : "" });
     const b = el("button", { type: "button", text: t.find, onclick: async () => {
       out.textContent = "…";
-      const r = await fetch("/api/geocode?q=" + encodeURIComponent(i.value));
-      if (!r.ok) { out.textContent = t.notFound; return; }
-      p.home = await r.json(); out.textContent = `${t.found} ${p.home.label}`;
+      try {
+        const r = await fetch("/api/geocode?q=" + encodeURIComponent(i.value));
+        if (!r.ok) throw new Error(String(r.status));
+        p.home = await r.json(); out.textContent = `${t.found} ${p.home.label}`;
+      } catch (e) { out.textContent = t.notFound; }
     } });
     return [el("label", {}, t.home, el("div", { class: "row" }, i, b), out), () => {}];
   }
@@ -98,13 +105,20 @@
     const state = new Map((p.avoid || []).map(a => [a.id, a]));
     const boxes = catalogue.map(d => { const b = el("input", { type: "checkbox", value: d.id }); b.checked = state.has(d.id) ? state.get(d.id).on : d.default; return [b, d]; });
     const customs = (p.avoid || []).filter(a => a.id.startsWith("custom-"));
-    const rows = el("div", { class: "row" });
-    const addRow = (a = { label: "", match: "", on: true }) => { const n = el("input", { type: "text", value: a.label, placeholder: t.customLabel }); const m = el("input", { type: "text", value: a.match, placeholder: t.customMatch }); rows.append(n, m); };
+    // Entries the catalogue does not list (e.g. it failed to load) are kept as they are.
+    const known = new Set(catalogue.map(d => d.id));
+    const kept = (p.avoid || []).filter(a => !a.id.startsWith("custom-") && !known.has(a.id));
+    const rows = el("div", { style: "display:grid;gap:8px" }); const custom = [];
+    const addRow = (a = { label: "", match: "", on: true }) => {
+      const c = el("input", { type: "checkbox" }); c.checked = a.on !== false;
+      const n = el("input", { type: "text", value: a.label, placeholder: t.customLabel }); const m = el("input", { type: "text", value: a.match, placeholder: t.customMatch });
+      custom.push([c, n, m]); rows.append(el("div", { class: "row" }, el("div", { class: "opts" }, el("label", {}, c, t.customOn)), n, m));
+    };
     customs.forEach(addRow); addRow();
     const read = () => {
-      const out = boxes.map(([b, d]) => ({ id: d.id, on: b.checked }));
-      const inputs = [...rows.querySelectorAll("input")];
-      for (let i = 0, k = 1; i < inputs.length; i += 2) { const label = inputs[i].value.trim(), match = inputs[i + 1].value.trim(); if (label && match) out.push({ id: `custom-${k++}`, on: true, label, match }); }
+      const out = boxes.map(([b, d]) => ({ id: d.id, on: b.checked })).concat(kept);
+      let k = 1;
+      for (const [c, n, m] of custom) { const label = n.value.trim(), match = m.value.trim(); if (label && match) out.push({ id: `custom-${k++}`, on: c.checked, label, match }); }
       p.avoid = out;
     };
     return [el("fieldset", {}, el("legend", { text: t.avoid }), el("div", { class: "opts" }, boxes.map(([b, d]) => el("label", { title: d.reason[lang] || d.reason.en }, b, d.label[lang] || d.label.en))), el("p", { class: "hint", text: t.custom }), rows), read];
@@ -136,37 +150,56 @@
 
   async function open({ mode, lang, onSaved }) {
     const t = L[lang] || L.en;
-    const catalogue = await (await fetch("drivetrains.json")).json();
+    let catalogue = [], loadFail = false;
+    try { const r = await fetch("drivetrains.json"); if (!r.ok) throw new Error(String(r.status)); catalogue = await r.json(); if (!Array.isArray(catalogue)) throw new Error("bad list"); }
+    catch (e) { catalogue = []; loadFail = true; }
     let p = mode === "settings" && window.CarHunt ? structuredClone(window.CarHunt.profile()) : defaultProfile();
     if (mode === "wizard") p.avoid = catalogue.map(d => ({ id: d.id, on: d.default }));
     const all = steps(t, p, catalogue, lang);
     const err = el("p", { class: "err" });
     const dlg = el("dialog", { class: "sx" });
     const form = el("form", { method: "dialog" });
-    let at = 0;
+    let at = 0, saved = false;
     const show = () => {
       form.innerHTML = "";
       const sections = mode === "wizard" ? [at] : all.map((_, i) => i);
       form.append(el("h2", { text: mode === "wizard" ? `${t.wizard} · ${at + 1}/${all.length}` : t.settings }));
+      if (loadFail) form.append(el("p", { class: "err", text: t.loadFail }));
       sections.forEach(i => form.append(el("fieldset", {}, el("h3", { text: t.steps[i] }), all[i].map(([node]) => node))));
       const bar = el("div", { class: "bar" });
       if (mode === "wizard" && at > 0) bar.append(el("button", { type: "button", text: t.back, onclick: () => { readStep(at); at--; show(); } }));
       if (mode === "settings") bar.append(el("button", { type: "button", text: t.cancel, onclick: () => dlg.close() }));
       bar.append(el("span"));
-      if (mode === "wizard" && at < all.length - 1) bar.append(el("button", { type: "button", class: "primary", text: t.next, onclick: () => { readStep(at); if (at === 0 && !p.home) { err.textContent = t.homeNeeded; return; } err.textContent = ""; at++; show(); } }));
+      if (mode === "wizard" && at < all.length - 1) bar.append(el("button", { type: "button", class: "primary", text: t.next, onclick: next }));
       else bar.append(el("button", { type: "button", class: "primary", text: mode === "wizard" ? t.finish : t.save, onclick: submit }));
       form.append(err, bar);
     };
-    const readStep = i => all[i].forEach(([, read]) => read());
-    async function submit() {
-      all.forEach((_, i) => readStep(i));
-      if (!p.home) { err.textContent = t.homeNeeded; return; }
-      const r = await fetch("/api/profile", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(p) });
-      if (!r.ok) { const j = await r.json().catch(() => ({})); err.textContent = (j.details || [String(r.status)]).join("\n"); return; }
-      dlg.close(); document.body.classList.remove("setup"); onSaved && onSaved();
+    // readStep returns the labels of number fields that are empty or not a number.
+    const readStep = i => all[i].map(([, read]) => read()).filter(x => typeof x === "string");
+    const badNumbers = bad => { if (!bad.length) return false; err.textContent = `${t.needNumber} ${bad.join(", ")}`; return true; };
+    function next() {
+      if (badNumbers(readStep(at))) return;
+      if (at === 0 && !p.home) { err.textContent = t.homeNeeded; return; }
+      err.textContent = ""; at++; show();
     }
-    dlg.append(form); document.body.append(dlg); dlg.addEventListener("close", () => dlg.remove());
-    if (mode === "wizard") dlg.addEventListener("cancel", e => e.preventDefault());
+    async function submit() {
+      if (badNumbers(all.flatMap((_, i) => readStep(i)))) return;
+      if (!p.home) { err.textContent = t.homeNeeded; return; }
+      let r;
+      try { r = await fetch("/api/profile", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(p) }); }
+      catch (e) { err.textContent = `${t.netFail} ${e.message}`; return; }
+      if (!r.ok) { const j = await r.json().catch(() => ({})); err.textContent = (j.details || [String(r.status)]).join("\n"); return; }
+      saved = true; dlg.close(); document.body.classList.remove("setup"); onSaved && onSaved();
+    }
+    // Enter never closes the form natively: it acts as Next, or as Save/Start on the last step.
+    form.addEventListener("submit", e => { e.preventDefault(); if (mode === "wizard" && at < all.length - 1) next(); else submit(); });
+    dlg.append(form); document.body.append(dlg);
+    // The wizard cannot be dismissed before a profile is saved.
+    dlg.addEventListener("close", () => { if (mode === "wizard" && !saved) dlg.showModal(); else dlg.remove(); });
+    if (mode === "wizard") {
+      dlg.addEventListener("cancel", e => e.preventDefault());
+      dlg.addEventListener("keydown", e => { if (e.key === "Escape") e.preventDefault(); });
+    }
     show(); dlg.showModal();
   }
 
