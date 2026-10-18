@@ -41,7 +41,7 @@ Stored as `profile.json` in `DATA_DIR`, next to `cars.json` and `meta.json`. One
     "finance": { "enabled": true, "monthlyCap": 250, "months": 60, "downPayment": 0, "apr": 8 }
   },
   "distance": { "maxDriveMin": 40, "preferTransit": true },
-  "equipment": { "must": [], "nice": ["carplay", "camera", "acc", "towbar", "led", "seatHeating"] },
+  "equipment": { "must": [], "nice": ["carplay", "camera", "acc", "ahk", "led", "seatheat"] },
   "avoid": [ { "id": "vw-dq200", "on": true }, { "id": "bmw-n47", "on": true }, { "id": "custom-1", "on": true, "label": "…", "match": "…" } ],
   "weights": { "km": 2, "docs": 2, "gearbox": 1, "seller": 1.5, "price": 1, "distance": 1.5, "equip": 1 },
   "outreach": { "enabled": true, "language": "de", "senderName": "Alex Example" }
