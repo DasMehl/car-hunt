@@ -341,13 +341,13 @@ tr:last-child td { border-bottom: 0; }
   const HOME = () => (P && P.home) || { lat: 51.1657, lon: 10.4515, label: "" };
   const I18N = {
     en: { locale: "en-GB",
-      sub: (n, d) => `${n} cars tracked · last listing check ${d || "–"} · from ${HOME().label}`,
+      sub: (n, d) => `${n} cars tracked · last listing check ${d || "–"}${HOME().label ? " · from " + HOME().label : ""}`,
       newSince: n => `${n} new since your last visit`, allSeen: "Mark all as seen",
       status: { candidate: "Not contacted", contacted: "Contacted", replied: "Replied", call: "Call seller", viewing: "Viewing planned", declined: "Seller declined", dropped: "Dropped", bought: "Bought" },
       fModel: "Model", eqMaybe: "Not listed, but usually fitted on this model year. Confirm with the seller.",
       kmYear: "km/yr", usageHigh: "motorway", usageLow: "lower use", kmYearTip: "Average distance per year since first registration. This alone does not show whether trips were long or short; ask about the car's use.",
       fStatus: "Status", fLimits: "Limits", fMust: "Must have", fSort: "Sort by", reset: "Reset filters", fBtn: n => "Filters" + (n ? " · " + n : ""), fClose: "Hide filters", tabMap: "Map", tabChart: "Chart",
-      maxPrice: "Max price", maxKm: "Max mileage", maxDrive: "Max transit time (one way)", maxDriveCar: "Max driving time (one way)", min: "min", transit: "by public transport", transitUnknown: "Transit time unverified", transitApprox: "to listing area; confirm seller address", transitLong: "Long trip", includeUnverified: "Show cars with unverified journey time", transitNote: "Times include walking and transfers from home. Based on a weekday journey to the listing area; check the exact seller address and departure before visiting.",
+      maxPrice: "Max price", maxKm: "Max mileage", maxDrive: "Max transit time (one way)", maxDriveCar: "Max driving time (one way)", driveNote: "Driving times by car from home, from OpenStreetMap routing; traffic not included.", tripUnknown: "Travel time unknown", sortDriveCar: "Driving time", colDriveCar: "Drive", min: "min", transit: "by public transport", transitUnknown: "Transit time unverified", transitApprox: "to listing area; confirm seller address", transitLong: "Long trip", includeUnverified: "Show cars with unverified journey time", transitNote: "Times include walking and transfers from home. Based on a weekday journey to the listing area; check the exact seller address and departure before visiting.",
       needCarplay: "CarPlay", needCam: "Rear camera", needAcc: "Adaptive cruise (ACC)", inCriteria: "Only cars that match my criteria", dealerOnly: "Dealer only (legal warranty)", hideGone: "Hide sold / gone",
       sortOpts: { rec: "Recommendation", score: "Score", reply: "Seller reply", price: "Price", km: "Mileage", year: "Year (newest)", drive: "Transit time", value: "Value (score per €1,000)" },
       kpiMatch: "cars match", kpiBest: "best score", kpiCheap: "cheapest", kpiNear: "nearest", kpiMedian: "median price",
@@ -364,16 +364,15 @@ tr:last-child td { border-bottom: 0; }
       statusL: "Status", next: "Next step", nextPh: "e.g. call after 13:00", notes: "My notes", notesPh: "Impressions, offers, things to check at the viewing…",
       logReply: "Log a reply", cancel: "Cancel", fromL: "From", via: "Via", vias: ["Phone", "mobile.de", "Email", "WhatsApp", "In person"], said: "What they said", add: "Add to conversation",
       saved: "Saved", saveFail: "Could not save", pick: "Shortlist", picked: "Shortlisted", priceHist: "Price history",
-      cmp: "Side by side", cols: ["Car", "Score", "Price", "km", "km/yr", "Year", "hp", "Gearbox", "Transit", "Seller", "Belt", "CarPlay", "Camera", "Status"],
-      howto: "Scores combine the ratings you weight in Settings: mileage and age, maintenance records, gearbox, seller and warranty, price, distance and equipment. Filters, map and chart work together: narrow the list, click a marker or dot to open that car. Shortlisting a car does not contact anyone." },
+      cmp: "Side by side", cols: ["Car", "Score", "Price", "km", "km/yr", "Year", "hp", "Gearbox", "Transit", "Seller", "Belt", "CarPlay", "Camera", "Status"] },
     de: { locale: "de-DE",
-      sub: (n, d) => `${n} Autos im Blick · letzte Inseratsprüfung ${d || "–"} · ab ${HOME().label}`,
+      sub: (n, d) => `${n} Autos im Blick · letzte Inseratsprüfung ${d || "–"}${HOME().label ? " · ab " + HOME().label : ""}`,
       newSince: n => `${n} neu seit deinem letzten Besuch`, allSeen: "Alle als gesehen markieren",
       status: { candidate: "Noch nicht angefragt", contacted: "Angefragt", replied: "Antwort da", call: "Anrufen", viewing: "Besichtigung geplant", declined: "Verkäufer lehnt ab", dropped: "Gestrichen", bought: "Gekauft" },
       fModel: "Modell", eqMaybe: "Nicht angegeben, in diesem Modelljahr aber meist verbaut. Beim Verkäufer bestätigen.",
       kmYear: "km/Jahr", usageHigh: "Langstrecke", usageLow: "weniger gefahren", kmYearTip: "Durchschnittliche Jahresfahrleistung seit Erstzulassung. Daraus lässt sich nicht erkennen, ob Lang- oder Kurzstrecken gefahren wurden; beim Verkäufer nachfragen.",
       fStatus: "Status", fLimits: "Grenzen", fMust: "Muss haben", fSort: "Sortieren nach", reset: "Filter zurücksetzen", fBtn: n => "Filter" + (n ? " · " + n : ""), fClose: "Filter ausblenden", tabMap: "Karte", tabChart: "Diagramm",
-      maxPrice: "Max. Preis", maxKm: "Max. Kilometer", maxDrive: "Max. ÖPNV-Fahrzeit (einfach)", maxDriveCar: "Max. Fahrzeit mit dem Auto (einfach)", min: "Min.", transit: "mit Bus & Bahn", transitUnknown: "ÖPNV-Zeit ungeprüft", transitApprox: "bis zum Inseratsgebiet; Verkäuferadresse prüfen", transitLong: "Lange Anfahrt", includeUnverified: "Autos mit ungeprüfter Anfahrt zeigen", transitNote: "Die Zeiten enthalten Fußwege und Umstiege ab Zuhause. Grundlage ist eine Werktagsverbindung bis zum Inseratsgebiet. Vor dem Besuch die genaue Verkäuferadresse und Abfahrt prüfen.",
+      maxPrice: "Max. Preis", maxKm: "Max. Kilometer", maxDrive: "Max. ÖPNV-Fahrzeit (einfach)", maxDriveCar: "Max. Fahrzeit mit dem Auto (einfach)", driveNote: "Fahrzeiten mit dem Auto ab Zuhause, berechnet mit OpenStreetMap-Routing; ohne Verkehr.", tripUnknown: "Fahrzeit unbekannt", sortDriveCar: "Fahrzeit", colDriveCar: "Fahrzeit", min: "Min.", transit: "mit Bus & Bahn", transitUnknown: "ÖPNV-Zeit ungeprüft", transitApprox: "bis zum Inseratsgebiet; Verkäuferadresse prüfen", transitLong: "Lange Anfahrt", includeUnverified: "Autos mit ungeprüfter Anfahrt zeigen", transitNote: "Die Zeiten enthalten Fußwege und Umstiege ab Zuhause. Grundlage ist eine Werktagsverbindung bis zum Inseratsgebiet. Vor dem Besuch die genaue Verkäuferadresse und Abfahrt prüfen.",
       needCarplay: "CarPlay", needCam: "Rückfahrkamera", needAcc: "Abstandstempomat (ACC)", inCriteria: "Nur Autos, die zu meinen Kriterien passen", dealerOnly: "Nur Händler (Gewährleistung)", hideGone: "Verkaufte ausblenden",
       sortOpts: { rec: "Empfehlung", score: "Punkte", reply: "Verkäuferantwort", price: "Preis", km: "Kilometer", year: "Baujahr (neueste)", drive: "ÖPNV-Fahrzeit", value: "Preis-Leistung (Punkte je 1.000 €)" },
       kpiMatch: "Autos passen", kpiBest: "beste Wertung", kpiCheap: "günstigstes", kpiNear: "nächstes", kpiMedian: "Median-Preis",
@@ -390,16 +389,15 @@ tr:last-child td { border-bottom: 0; }
       statusL: "Status", next: "Nächster Schritt", nextPh: "z. B. ab 13 Uhr anrufen", notes: "Meine Notizen", notesPh: "Eindrücke, Angebote, was bei der Besichtigung zu prüfen ist…",
       logReply: "Antwort eintragen", cancel: "Abbrechen", fromL: "Von", via: "Über", vias: ["Telefon", "mobile.de", "E-Mail", "WhatsApp", "Persönlich"], said: "Was gesagt wurde", add: "Zum Verlauf hinzufügen",
       saved: "Gespeichert", saveFail: "Speichern fehlgeschlagen", pick: "Vormerken", picked: "Vorgemerkt", priceHist: "Preisverlauf",
-      cmp: "Im Vergleich", cols: ["Auto", "Punkte", "Preis", "km", "km/Jahr", "Baujahr", "PS", "Getriebe", "ÖPNV", "Verkäufer", "Zahnriemen", "CarPlay", "Kamera", "Status"],
-      howto: "Die Punkte kombinieren die Bewertungen, die du in den Einstellungen gewichtest: Laufleistung und Alter, Wartungsnachweise, Getriebe, Verkäufer und Gewährleistung, Preis, Entfernung und Ausstattung. Filter, Karte und Diagramm arbeiten zusammen: Liste eingrenzen, Marker oder Punkt anklicken, Auto öffnet sich. Vormerken schreibt niemanden an." },
+      cmp: "Im Vergleich", cols: ["Auto", "Punkte", "Preis", "km", "km/Jahr", "Baujahr", "PS", "Getriebe", "ÖPNV", "Verkäufer", "Zahnriemen", "CarPlay", "Kamera", "Status"] },
     pt: { locale: "pt-BR",
-      sub: (n, d) => `${n} carros acompanhados · última verificação dos anúncios ${d || "–"} · a partir de ${HOME().label}`,
+      sub: (n, d) => `${n} carros acompanhados · última verificação dos anúncios ${d || "–"}${HOME().label ? " · a partir de " + HOME().label : ""}`,
       newSince: n => `${n} novos desde sua última visita`, allSeen: "Marcar todos como vistos",
       status: { candidate: "Não contatado", contacted: "Contatado", replied: "Respondeu", call: "Ligar", viewing: "Visita marcada", declined: "Vendedor recusou", dropped: "Descartado", bought: "Comprado" },
       fModel: "Modelo", eqMaybe: "Não listado, mas geralmente presente neste ano-modelo. Confirme com o vendedor.",
       kmYear: "km/ano", usageHigh: "rodovia", usageLow: "menos uso", kmYearTip: "Distância média por ano desde o primeiro emplacamento. Isso não mostra se os trajetos foram longos ou curtos; pergunte ao vendedor.",
       fStatus: "Status", fLimits: "Limites", fMust: "Obrigatório", fSort: "Ordenar por", reset: "Limpar filtros", fBtn: n => "Filtros" + (n ? " · " + n : ""), fClose: "Ocultar filtros", tabMap: "Mapa", tabChart: "Gráfico",
-      maxPrice: "Preço máx.", maxKm: "Km máx.", maxDrive: "Tempo máx. transporte público (ida)", maxDriveCar: "Tempo máx. de carro (ida)", min: "min", transit: "de transporte público", transitUnknown: "Tempo não verificado", transitApprox: "até a área do anúncio; confirmar endereço", transitLong: "Viagem longa", includeUnverified: "Mostrar carros com viagem não verificada", transitNote: "Os tempos incluem caminhada e baldeações desde casa. Baseados em dia útil até a área do anúncio; confira o endereço exato e o horário antes da visita.",
+      maxPrice: "Preço máx.", maxKm: "Km máx.", maxDrive: "Tempo máx. transporte público (ida)", maxDriveCar: "Tempo máx. de carro (ida)", driveNote: "Tempos de carro desde casa, calculados com roteamento do OpenStreetMap; sem trânsito.", tripUnknown: "Tempo de viagem desconhecido", sortDriveCar: "Tempo de carro", colDriveCar: "Carro", min: "min", transit: "de transporte público", transitUnknown: "Tempo não verificado", transitApprox: "até a área do anúncio; confirmar endereço", transitLong: "Viagem longa", includeUnverified: "Mostrar carros com viagem não verificada", transitNote: "Os tempos incluem caminhada e baldeações desde casa. Baseados em dia útil até a área do anúncio; confira o endereço exato e o horário antes da visita.",
       needCarplay: "CarPlay", needCam: "Câmera de ré", needAcc: "Piloto adaptativo (ACC)", inCriteria: "Só carros dentro dos meus critérios", dealerOnly: "Só lojas (garantia legal)", hideGone: "Ocultar vendidos",
       sortOpts: { rec: "Recomendação", score: "Pontuação", reply: "Resposta do vendedor", price: "Preço", km: "Quilometragem", year: "Ano (mais novo)", drive: "Transporte público", value: "Custo-benefício (pontos por € 1.000)" },
       kpiMatch: "carros no filtro", kpiBest: "melhor pontuação", kpiCheap: "mais barato", kpiNear: "mais perto", kpiMedian: "preço mediano",
@@ -416,23 +414,25 @@ tr:last-child td { border-bottom: 0; }
       statusL: "Status", next: "Próximo passo", nextPh: "ex.: ligar depois das 13h", notes: "Minhas anotações", notesPh: "Impressões, ofertas, o que verificar na visita…",
       logReply: "Registrar resposta", cancel: "Cancelar", fromL: "De", via: "Por", vias: ["Telefone", "mobile.de", "E-mail", "WhatsApp", "Pessoalmente"], said: "O que disseram", add: "Adicionar à conversa",
       saved: "Salvo", saveFail: "Não foi possível salvar", pick: "Salvar", picked: "Salvo", priceHist: "Histórico de preço",
-      cmp: "Lado a lado", cols: ["Carro", "Pontos", "Preço", "km", "km/ano", "Ano", "cv", "Câmbio", "Viagem", "Vendedor", "Correia", "CarPlay", "Câmera", "Status"],
-      howto: "A pontuação combina as notas que você pondera nas Configurações: quilometragem e idade, manutenção, câmbio, vendedor e garantia, preço, distância e equipamentos. Filtros, mapa e gráfico trabalham juntos: restrinja a lista, clique num marcador ou ponto para abrir o carro. Salvar um carro não contata ninguém." }
+      cmp: "Lado a lado", cols: ["Carro", "Pontos", "Preço", "km", "km/ano", "Ano", "cv", "Câmbio", "Viagem", "Vendedor", "Correia", "CarPlay", "Câmera", "Status"] }
   };
   const COST_I18N = {
-    en: { title: "What will each car cost?", intro: "Planning estimate. Choose up to six cars and adjust the assumptions.", km: "km/year", fuelPrice: "Fuel €/l", apr: "Loan APR %", insurance: "Insurance €/year", upkeep: "Service + repair reserve €/year", fixed: "Tax + HU €/year", fuel: "Fuel", fees: "Insurance + tax + HU", repair: "Service + repairs", loan: "Loan", year: "/year", month: "/month", use: "Fuel use", note: (n, down) => `Bars show yearly cash outflow, including ${n} monthly loan payments with ${down} down and no balloon. Fuel use is an editable planning estimate, not a measurement of this car. Insurance, tax and repairs vary by driver and vehicle; obtain quotes and inspect service records. Depreciation and resale value are excluded.`, pick: "Cars to compare" },
-    de: { title: "Was kostet jedes Auto?", intro: "Planungsrechnung. Bis zu sechs Autos auswählen und Annahmen anpassen.", km: "km/Jahr", fuelPrice: "Kraftstoff €/l", apr: "Kreditzins %", insurance: "Versicherung €/Jahr", upkeep: "Wartung + Reparaturreserve €/Jahr", fixed: "Steuer + HU €/Jahr", fuel: "Kraftstoff", fees: "Versicherung + Steuer + HU", repair: "Wartung + Reparaturen", loan: "Kredit", year: "/Jahr", month: "/Monat", use: "Verbrauch", note: (n, down) => `Die Balken zeigen jährliche Ausgaben inklusive ${n} Kreditraten mit ${down} Anzahlung und ohne Schlussrate. Der Verbrauch ist eine änderbare Planungsannahme, kein Messwert dieses Autos. Versicherung, Steuer und Reparaturen hängen von Fahrer und Fahrzeug ab; Angebote einholen und Wartungsbelege prüfen. Wertverlust und Wiederverkauf sind nicht enthalten.`, pick: "Autos vergleichen" },
-    pt: { title: "Quanto custa cada carro?", intro: "Estimativa de planejamento. Escolha até seis carros e ajuste as premissas.", km: "km/ano", fuelPrice: "Combustível €/l", apr: "Juros anuais %", insurance: "Seguro €/ano", upkeep: "Revisões + reserva para reparos €/ano", fixed: "Imposto + inspeção €/ano", fuel: "Combustível", fees: "Seguro + imposto + inspeção", repair: "Revisões + reparos", loan: "Financiamento", year: "/ano", month: "/mês", use: "Consumo", note: (n, down) => `As barras mostram os gastos anuais, incluindo ${n} parcelas com entrada de ${down} e sem parcela final. O consumo é uma estimativa ajustável, não uma medição deste carro. Seguro, imposto e reparos variam; peça cotações e confira o histórico de manutenção. Depreciação e revenda não estão incluídas.`, pick: "Carros para comparar" }
+    en: { title: "What will each car cost?", intro: "Planning estimate. Choose up to six cars and adjust the assumptions.", km: "km/year", apr: "Loan APR %", insurance: "Insurance €/year", upkeep: "Service + repair reserve €/year", fixed: "Tax + HU €/year", fuel: "Fuel", fees: "Insurance + tax + HU", repair: "Service + repairs", loan: "Loan", year: "/year", month: "/month", use: "Fuel use", note: (n, down) => `Bars show yearly cash outflow, including ${n} monthly loan payments with ${down} down and no balloon. Fuel use is an editable planning estimate, not a measurement of this car. Insurance, tax and repairs vary by driver and vehicle; obtain quotes and inspect service records. Depreciation and resale value are excluded.`, noteNoLoan: "Bars show yearly cash outflow. Fuel use is an editable planning estimate, not a measurement of this car. Insurance, tax and repairs vary by driver and vehicle; obtain quotes and inspect service records. Depreciation and resale value are excluded.", pick: "Cars to compare" },
+    de: { title: "Was kostet jedes Auto?", intro: "Planungsrechnung. Bis zu sechs Autos auswählen und Annahmen anpassen.", km: "km/Jahr", apr: "Kreditzins %", insurance: "Versicherung €/Jahr", upkeep: "Wartung + Reparaturreserve €/Jahr", fixed: "Steuer + HU €/Jahr", fuel: "Kraftstoff", fees: "Versicherung + Steuer + HU", repair: "Wartung + Reparaturen", loan: "Kredit", year: "/Jahr", month: "/Monat", use: "Verbrauch", note: (n, down) => `Die Balken zeigen jährliche Ausgaben inklusive ${n} Kreditraten mit ${down} Anzahlung und ohne Schlussrate. Der Verbrauch ist eine änderbare Planungsannahme, kein Messwert dieses Autos. Versicherung, Steuer und Reparaturen hängen von Fahrer und Fahrzeug ab; Angebote einholen und Wartungsbelege prüfen. Wertverlust und Wiederverkauf sind nicht enthalten.`, noteNoLoan: "Die Balken zeigen jährliche Ausgaben. Der Verbrauch ist eine änderbare Planungsannahme, kein Messwert dieses Autos. Versicherung, Steuer und Reparaturen hängen von Fahrer und Fahrzeug ab; Angebote einholen und Wartungsbelege prüfen. Wertverlust und Wiederverkauf sind nicht enthalten.", pick: "Autos vergleichen" },
+    pt: { title: "Quanto custa cada carro?", intro: "Estimativa de planejamento. Escolha até seis carros e ajuste as premissas.", km: "km/ano", apr: "Juros anuais %", insurance: "Seguro €/ano", upkeep: "Revisões + reserva para reparos €/ano", fixed: "Imposto + inspeção €/ano", fuel: "Combustível", fees: "Seguro + imposto + inspeção", repair: "Revisões + reparos", loan: "Financiamento", year: "/ano", month: "/mês", use: "Consumo", note: (n, down) => `As barras mostram os gastos anuais, incluindo ${n} parcelas com entrada de ${down} e sem parcela final. O consumo é uma estimativa ajustável, não uma medição deste carro. Seguro, imposto e reparos variam; peça cotações e confira o histórico de manutenção. Depreciação e revenda não estão incluídas.`, noteNoLoan: "As barras mostram os gastos anuais. O consumo é uma estimativa ajustável, não uma medição deste carro. Seguro, imposto e reparos variam; peça cotações e confira o histórico de manutenção. Depreciação e revenda não estão incluídas.", pick: "Carros para comparar" }
   };
   const UX = {
-    en: { visitTitle: "Replied and worth a visit", visitHint: "Sellers who answered and whose car is worth seeing, in order.", visitNext: "Next", nav: ["Visit", "Focus", "Costs", "Listings", "Map & chart", "Compare"], focus: "Cars worth a closer look", focusHint: "Shortlisted cars first, then the highest rated available listings. Scores summarize evidence; check the documents before deciding.", loan: "loan/month", loanLimit: cap => `${cap} loan limit`, maxPriceLine: "max price", score: "score", reply: "Seller reply", replyHint: "Answers and inspection access; seller claims are not yet verified.", compare: "Compare costs", comparing: "In cost comparison", shortlist: "Shortlist", shortlisted: "Shortlisted", search: "Search car, city or seller", savedOnly: "Shortlist only", affordable: cap => `Loan ≤ ${cap}/month`, more: "Show 12 more", all: "All shown", cmp: "Selected cars side by side", howto: "A score summarizes listing evidence, maintenance, gearbox, seller, price and equipment. Shortlist saves a car on this site; it does not contact the seller. Cost figures are estimates. The last listing-check time above records the latest scan; individual ads may change between checks.", noFocus: "No available cars match your filters.", details: "Open details",
+    en: { visitTitle: "Replied and worth a visit", visitHint: "Sellers who answered and whose car is worth seeing, in order.", visitNext: "Next", nav: ["Visit", "Focus", "Costs", "Listings", "Map & chart", "Compare"], focus: "Cars worth a closer look", focusHint: "Shortlisted cars first, then the highest rated available listings. Scores summarize evidence; check the documents before deciding.", loan: "loan/month", loanLimit: cap => `${cap} loan limit`, maxPriceLine: "max price", score: "score", reply: "Seller reply", replyHint: "Answers and inspection access; seller claims are not yet verified.", compare: "Compare costs", comparing: "In cost comparison", shortlist: "Shortlist", shortlisted: "Shortlisted", search: "Search car, city or seller", savedOnly: "Shortlist only", affordable: cap => `Loan ≤ ${cap}/month`, more: "Show 12 more", all: "All shown", cmp: "Selected cars side by side", howto: "Scores combine the ratings you weight in Settings: mileage and age, maintenance records, gearbox, seller and warranty, price, distance and equipment. Filters, map and chart work together: narrow the list, click a marker or dot to open that car. Shortlisting a car does not contact anyone.", noFocus: "No available cars match your filters.", details: "Open details",
       outside: "Outside your criteria",
+      fuels: { diesel: "Diesel", petrol: "Petrol", hybrid: "Hybrid", plugin: "Plug-in hybrid", electric: "Electric", lpg: "LPG" }, gearboxes: { automatic: "Automatic", manual: "Manual" },
       crit: { fuel: v => `Fuel: ${v}`, gearbox: v => `Gearbox: ${v}`, make: v => `Make: ${v}`, price: v => `Price ${v}`, km: v => `Mileage ${v}`, year: v => `Year ${v}`, hp: v => `${v} hp`, drive: v => `${v} min away`, equip: v => `Missing: ${v}`, avoid: v => v } },
-    de: { visitTitle: "Geantwortet und eine Besichtigung wert", visitHint: "Verkäufer, die geantwortet haben und deren Auto sich anzusehen lohnt, in Reihenfolge.", visitNext: "Nächster Schritt", nav: ["Besichtigen", "Im Fokus", "Kosten", "Inserate", "Karte & Diagramm", "Vergleich"], focus: "Autos für die engere Auswahl", focusHint: "Zuerst vorgemerkte Autos, dann die bestbewerteten verfügbaren Inserate. Punkte fassen Belege zusammen; Unterlagen vor der Entscheidung prüfen.", loan: "Kredit/Monat", loanLimit: cap => `${cap} Kreditlimit`, maxPriceLine: "Höchstpreis", score: "Punkte", reply: "Verkäuferantwort", replyHint: "Antworten und unabhängige Prüfung; Verkäuferaussagen sind noch nicht belegt.", compare: "Kosten vergleichen", comparing: "Im Kostenvergleich", shortlist: "Vormerken", shortlisted: "Vorgemerkt", search: "Auto, Ort oder Verkäufer suchen", savedOnly: "Nur vorgemerkte", affordable: cap => `Kredit ≤ ${cap}/Monat`, more: "12 weitere zeigen", all: "Alle angezeigt", cmp: "Ausgewählte Autos im Vergleich", howto: "Die Punkte fassen Inseratsbelege, Wartung, Getriebe, Verkäufer, Preis und Ausstattung zusammen. Vormerken speichert das Auto auf dieser Seite; es wird keine Nachricht verschickt. Kosten sind Schätzungen. Die letzte Inseratsprüfung steht oben; einzelne Anzeigen können sich inzwischen ändern.", noFocus: "Keine verfügbaren Autos passen zu den Filtern.", details: "Details öffnen",
+    de: { visitTitle: "Geantwortet und eine Besichtigung wert", visitHint: "Verkäufer, die geantwortet haben und deren Auto sich anzusehen lohnt, in Reihenfolge.", visitNext: "Nächster Schritt", nav: ["Besichtigen", "Im Fokus", "Kosten", "Inserate", "Karte & Diagramm", "Vergleich"], focus: "Autos für die engere Auswahl", focusHint: "Zuerst vorgemerkte Autos, dann die bestbewerteten verfügbaren Inserate. Punkte fassen Belege zusammen; Unterlagen vor der Entscheidung prüfen.", loan: "Kredit/Monat", loanLimit: cap => `${cap} Kreditlimit`, maxPriceLine: "Höchstpreis", score: "Punkte", reply: "Verkäuferantwort", replyHint: "Antworten und unabhängige Prüfung; Verkäuferaussagen sind noch nicht belegt.", compare: "Kosten vergleichen", comparing: "Im Kostenvergleich", shortlist: "Vormerken", shortlisted: "Vorgemerkt", search: "Auto, Ort oder Verkäufer suchen", savedOnly: "Nur vorgemerkte", affordable: cap => `Kredit ≤ ${cap}/Monat`, more: "12 weitere zeigen", all: "Alle angezeigt", cmp: "Ausgewählte Autos im Vergleich", howto: "Die Punkte kombinieren die Bewertungen, die du in den Einstellungen gewichtest: Laufleistung und Alter, Wartungsnachweise, Getriebe, Verkäufer und Gewährleistung, Preis, Entfernung und Ausstattung. Filter, Karte und Diagramm arbeiten zusammen: Liste eingrenzen, Marker oder Punkt anklicken, Auto öffnet sich. Vormerken schreibt niemanden an.", noFocus: "Keine verfügbaren Autos passen zu den Filtern.", details: "Details öffnen",
       outside: "Außerhalb deiner Kriterien",
+      fuels: { diesel: "Diesel", petrol: "Benzin", hybrid: "Hybrid", plugin: "Plug-in-Hybrid", electric: "Elektro", lpg: "Autogas" }, gearboxes: { automatic: "Automatik", manual: "Schaltgetriebe" },
       crit: { fuel: v => `Kraftstoff: ${v}`, gearbox: v => `Getriebe: ${v}`, make: v => `Marke: ${v}`, price: v => `Preis ${v}`, km: v => `Laufleistung ${v}`, year: v => `Baujahr ${v}`, hp: v => `${v} PS`, drive: v => `${v} Min. entfernt`, equip: v => `Fehlt: ${v}`, avoid: v => v } },
-    pt: { visitTitle: "Responderam e valem uma visita", visitHint: "Vendedores que responderam e cujo carro vale a pena ver, em ordem.", visitNext: "Próximo passo", nav: ["Visitar", "Destaques", "Custos", "Anúncios", "Mapa e gráfico", "Comparar"], focus: "Carros para olhar de perto", focusHint: "Primeiro os salvos, depois os anúncios disponíveis com melhor nota. Confira os documentos antes de decidir.", loan: "crédito/mês", loanLimit: cap => `limite ${cap}/mês`, maxPriceLine: "preço máx.", score: "pontos", reply: "Resposta do vendedor", replyHint: "Respostas e vistoria independente; informações ainda não verificadas.", compare: "Comparar custos", comparing: "Na comparação de custos", shortlist: "Salvar", shortlisted: "Salvo", search: "Buscar carro, cidade ou vendedor", savedOnly: "Só salvos", affordable: cap => `Crédito ≤ ${cap}/mês`, more: "Mostrar mais 12", all: "Todos exibidos", cmp: "Carros escolhidos lado a lado", howto: "A nota resume documentos do anúncio, manutenção, câmbio, vendedor, preço e equipamentos. Salvar guarda o carro neste site; não envia mensagem ao vendedor. Custos são estimativas. A data da última verificação aparece acima; anúncios podem mudar entre verificações.", noFocus: "Nenhum carro disponível corresponde aos filtros.", details: "Abrir detalhes",
+    pt: { visitTitle: "Responderam e valem uma visita", visitHint: "Vendedores que responderam e cujo carro vale a pena ver, em ordem.", visitNext: "Próximo passo", nav: ["Visitar", "Destaques", "Custos", "Anúncios", "Mapa e gráfico", "Comparar"], focus: "Carros para olhar de perto", focusHint: "Primeiro os salvos, depois os anúncios disponíveis com melhor nota. Confira os documentos antes de decidir.", loan: "crédito/mês", loanLimit: cap => `limite ${cap}/mês`, maxPriceLine: "preço máx.", score: "pontos", reply: "Resposta do vendedor", replyHint: "Respostas e vistoria independente; informações ainda não verificadas.", compare: "Comparar custos", comparing: "Na comparação de custos", shortlist: "Salvar", shortlisted: "Salvo", search: "Buscar carro, cidade ou vendedor", savedOnly: "Só salvos", affordable: cap => `Crédito ≤ ${cap}/mês`, more: "Mostrar mais 12", all: "Todos exibidos", cmp: "Carros escolhidos lado a lado", howto: "A pontuação combina as notas que você pondera nas Configurações: quilometragem e idade, manutenção, câmbio, vendedor e garantia, preço, distância e equipamentos. Filtros, mapa e gráfico trabalham juntos: restrinja a lista, clique num marcador ou ponto para abrir o carro. Salvar um carro não contata ninguém.", noFocus: "Nenhum carro disponível corresponde aos filtros.", details: "Abrir detalhes",
       outside: "Fora dos seus critérios",
+      fuels: { diesel: "Diesel", petrol: "Gasolina", hybrid: "Híbrido", plugin: "Híbrido plug-in", electric: "Elétrico", lpg: "GLP" }, gearboxes: { automatic: "Automático", manual: "Manual" },
       crit: { fuel: v => `Combustível: ${v}`, gearbox: v => `Câmbio: ${v}`, make: v => `Marca: ${v}`, price: v => `Preço ${v}`, km: v => `Quilometragem ${v}`, year: v => `Ano ${v}`, hp: v => `${v} cv`, drive: v => `a ${v} min`, equip: v => `Falta: ${v}`, avoid: v => v } }
   };
   const STATUS_RANK = { bought: 0, call: 1, replied: 2, viewing: 3, contacted: 4, candidate: 4, dropped: 8, declined: 9 };
@@ -444,7 +444,7 @@ tr:last-child td { border-bottom: 0; }
   const esc = s => String(s ?? "").replace(/[&<>"]/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[ch]);
   const critText = r => {
     const f = UX[lang].crit[r.key];
-    const v = r.key === "price" ? eur(r.value) : r.key === "km" ? km(r.value) : r.key === "equip" ? (T.eq[r.value] || r.value) : r.key === "avoid" ? (r.def.label[lang] || r.def.label.en) : r.value;
+    const v = r.key === "price" ? eur(r.value) : r.key === "km" ? km(r.value) : r.key === "equip" ? (T.eq[r.value] || r.value) : r.key === "fuel" ? (UX[lang].fuels[r.value] || r.value) : r.key === "gearbox" ? (UX[lang].gearboxes[r.value] || r.value) : r.key === "avoid" ? (r.def.label[lang] || r.def.label.en) : r.value;
     return f(v);
   };
 
@@ -478,7 +478,7 @@ tr:last-child td { border-bottom: 0; }
   const transitText = c => transitMinutes(c) ? `~${transitMinutes(c)} ${T.min} ${T.transit}` : T.transitUnknown;
   const driveMinutes = c => Number.isFinite(+c.driveMin) && +c.driveMin > 0 ? +c.driveMin : null;
   const tripMin = c => (P && P.distance.preferTransit) ? transitMinutes(c) : driveMinutes(c);
-  const tripText = c => (P && P.distance.preferTransit) ? transitText(c) : (driveMinutes(c) ? `~${driveMinutes(c)} ${T.min} ${T.byCar}` : T.transitUnknown);
+  const tripText = c => (P && P.distance.preferTransit) ? transitText(c) : (driveMinutes(c) ? `~${driveMinutes(c)} ${T.min} ${T.byCar}` : T.tripUnknown);
   const transitUrl = c => "https://www.google.com/maps/dir/?api=1&origin=" + encodeURIComponent(HOME().label) + "&destination=" + encodeURIComponent(c.transitDestination || c.location || c.city || "") + "&travelmode=transit";
   const famOf = c => String(c.model || c.title || "Other").trim().split(/\s+/).slice(0, 2).join(" ");
   let lastVisit = null; try { lastVisit = localStorage.getItem("carhunt-lastvisit"); } catch (e) {}
@@ -494,7 +494,7 @@ tr:last-child td { border-bottom: 0; }
   function matches(c) {
     if (F.query && !(String(c.displayTitle || c.title || "") + " " + String(c.model || "") + " " + String(c.city || "") + " " + String(c.sellerName || "")).toLocaleLowerCase().includes(F.query.trim().toLocaleLowerCase())) return false;
     if (F.savedOnly && !c.pick) return false;
-    if (F.affordable && (!c.price || loanMonthly(c.price, costPrefs.apr) > loanCap())) return false;
+    if (fin().enabled && F.affordable && (!c.price || loanMonthly(c.price, costPrefs.apr) > loanCap())) return false;
     if (F.statuses.size && !F.statuses.has(c.status)) return false;
     if (F.models.size && !F.models.has(famOf(c))) return false;
     if (c.price > F.maxPrice || c.km > F.maxKm || (tripMin(c) ?? 0) > F.maxDrive || (!tripMin(c) && !F.includeUnverified)) return false;
@@ -523,10 +523,10 @@ tr:last-child td { border-bottom: 0; }
   const visible = () => sortCars(cars.filter(matches));
 
   // Adjustable ownership cash-flow estimate. Stored only in this browser.
-  const COST_DEFAULT = { annualKm: 15000, fuelPrice: 1.8, apr: 7.5, insurance: 850, upkeep: 1000, fixed: 250 };
+  const COST_DEFAULT = { annualKm: 15000, fuelPrices: { diesel: 1.75, petrol: 1.85, hybrid: 1.85, plugin: 1.85, lpg: 1.05, electric: 0.40 }, apr: 7.5, insurance: 850, upkeep: 1000, fixed: 250 };
   let costPrefs = { ...COST_DEFAULT }, costSelected = [], costUse = {};
   let costPrefsStored = false;
-  try { const x = JSON.parse(localStorage.getItem("carhunt-costs") || "null"); if (x) { costPrefsStored = true; costPrefs = { ...costPrefs, ...(x.prefs || {}) }; costSelected = x.selected || costSelected; costUse = x.use || {}; } } catch (e) {}
+  try { const x = JSON.parse(localStorage.getItem("carhunt-costs") || "null"); if (x) { costPrefsStored = true; costPrefs = { ...costPrefs, ...(x.prefs || {}), fuelPrices: { ...COST_DEFAULT.fuelPrices, ...((x.prefs || {}).fuelPrices || {}) } }; delete costPrefs.fuelPrice; costSelected = x.selected || costSelected; costUse = x.use || {}; } } catch (e) {}
   const saveCosts = () => { try { localStorage.setItem("carhunt-costs", JSON.stringify({ prefs: costPrefs, selected: costSelected, use: costUse })); } catch (e) {} };
   function estimatedUse(c) { return { diesel: 5.8, petrol: 7.0, hybrid: 5.0, plugin: 4.0, lpg: 9.0, electric: 18 }[Criteria.fuelOf(c)] || 6.5; }
   const fin = () => P.money.finance;
@@ -538,27 +538,35 @@ tr:last-child td { border-bottom: 0; }
     const t = COST_I18N[lang], host = $("#costs"); host.innerHTML = "";
     host.append(el("h2", null, t.title), el("p", "intro", t.intro));
     const inputs = el("div", "cost-inputs");
-    [["annualKm", t.km, 1000, 50000, 1000], ["fuelPrice", t.fuelPrice, .1, 5, .01], ...(fin().enabled ? [["apr", t.apr, 0, 25, .1]] : []), ["insurance", t.insurance, 0, 5000, 50], ["upkeep", t.upkeep, 0, 5000, 50], ["fixed", t.fixed, 0, 2000, 10]].forEach(([key, label, min, max, step]) => {
-      const l = el("label", null, label), input = el("input"); input.type = "number"; input.min = min; input.max = max; input.step = step; input.value = costPrefs[key]; input.setAttribute("aria-label", label);
-      input.onchange = () => { const n = Number(input.value); if (Number.isFinite(n)) costPrefs[key] = Math.min(max, Math.max(min, n)); saveCosts(); render(); }; l.append(input); inputs.append(l);
-    }); host.append(inputs);
+    const addInput = (label, min, max, step, get, set) => {
+      const l = el("label", null, label), input = el("input"); input.type = "number"; input.min = min; input.max = max; input.step = step; input.value = get(); input.setAttribute("aria-label", label);
+      input.onchange = () => { const n = Number(input.value); if (Number.isFinite(n)) set(Math.min(max, Math.max(min, n))); saveCosts(); render(); }; l.append(input); inputs.append(l);
+    };
+    const pref = (key, label, min, max, step) => addInput(label, min, max, step, () => costPrefs[key], n => { costPrefs[key] = n; });
+    pref("annualKm", t.km, 1000, 50000, 1000);
+    P.car.fuels.forEach(fu => addInput(`${UX[lang].fuels[fu]} ${fu === "electric" ? "€/kWh" : "€/l"}`, .01, 5, .01, () => costPrefs.fuelPrices[fu], n => { costPrefs.fuelPrices[fu] = n; }));
+    if (fin().enabled) pref("apr", t.apr, 0, 25, .1);
+    pref("insurance", t.insurance, 0, 5000, 50); pref("upkeep", t.upkeep, 0, 5000, 50); pref("fixed", t.fixed, 0, 2000, 10);
+    host.append(inputs);
     host.append(el("strong", null, t.pick)); const picks = el("div", "cost-picks");
     const choices = [...new Map([...list.slice(0, 12), ...costSelected.map(id => cars.find(c => c.id === id)).filter(Boolean)].map(c => [c.id, c])).values()];
     choices.forEach(c => { const b = el("button", null, c.displayTitle || c.title); b.type = "button"; b.setAttribute("aria-pressed", costSelected.includes(c.id)); b.disabled = costSelected.length >= 6 && !costSelected.includes(c.id); b.onclick = () => { if (costSelected.includes(c.id)) costSelected = costSelected.filter(x => x !== c.id); else if (costSelected.length < 6) costSelected.push(c.id); saveCosts(); render(); }; picks.append(b); }); host.append(picks);
     const rows = costSelected.map(id => cars.find(c => c.id === id)).filter(c => c && !c.gone && !["dropped", "declined"].includes(c.status)).map(c => {
       const use = Number.isFinite(Number(costUse[c.id])) && Number(costUse[c.id]) > 0 ? Number(costUse[c.id]) : estimatedUse(c);
-      const fuel = costPrefs.annualKm * use / 100 * costPrefs.fuelPrice, fees = Number(costPrefs.insurance) + Number(costPrefs.fixed), repair = Number(costPrefs.upkeep), loan = fin().enabled ? loanMonthly(c.price, costPrefs.apr) * 12 : 0;
-      return { c, use, fuel, fees, repair, loan, total: fuel + fees + repair + loan };
+      const fu = Criteria.fuelOf(c), elec = fu === "electric", fuelPrice = Number(costPrefs.fuelPrices[fu] ?? costPrefs.fuelPrices.petrol);
+      const fuel = costPrefs.annualKm * use / 100 * fuelPrice, fees = Number(costPrefs.insurance) + Number(costPrefs.fixed), repair = Number(costPrefs.upkeep), loan = fin().enabled ? loanMonthly(c.price, costPrefs.apr) * 12 : 0;
+      return { c, use, elec, fuel, fees, repair, loan, total: fuel + fees + repair + loan };
     });
     const max = Math.max(...rows.map(r => r.total), 1), wrap = el("div", "cost-rows");
-    rows.forEach(r => { const row = el("div", "cost-row"), name = el("div"); name.append(el("strong", null, r.c.displayTitle || r.c.title)); const useLabel = el("label"); useLabel.append(document.createTextNode(t.use + " ")); const useInput = el("input"); useInput.type = "number"; useInput.min = 3; useInput.max = 12; useInput.step = .1; useInput.value = r.use; useInput.style.width = "52px"; useInput.setAttribute("aria-label", `${r.c.displayTitle || r.c.title}: ${t.use} l/100 km`); useInput.onchange = () => { const n = Number(useInput.value); if (Number.isFinite(n)) costUse[r.c.id] = Math.min(12, Math.max(3, n)); saveCosts(); renderCosts(list); }; useLabel.append(useInput, document.createTextNode(" l/100 km")); name.append(useLabel);
-      const bar = el("div", "cost-bar"); bar.setAttribute("role", "img"); bar.setAttribute("aria-label", `${r.c.displayTitle || r.c.title}: ${t.fuel} ${eur(r.fuel)}, ${t.fees} ${eur(r.fees)}, ${t.repair} ${eur(r.repair)}, ${t.loan} ${eur(r.loan)}`);
-      [["fuel", r.fuel], ["fixed", r.fees], ["repair", r.repair], ["loan", r.loan]].forEach(([cls, value]) => { const part = el("span", cls); part.style.width = (value / max * 100) + "%"; bar.append(part); });
-      const graph = el("div", "cost-graph"); graph.append(bar, el("div", "cost-detail", `${t.fuel} ${eur(Math.round(r.fuel))} · ${t.fees} ${eur(Math.round(r.fees))} · ${t.repair} ${eur(Math.round(r.repair))} · ${t.loan} ${eur(Math.round(r.loan))}`));
+    const parts = r => [["fuel", t.fuel, r.fuel], ["fixed", t.fees, r.fees], ["repair", t.repair, r.repair], ...(fin().enabled ? [["loan", t.loan, r.loan]] : [])];
+    rows.forEach(r => { const row = el("div", "cost-row"), name = el("div"); name.append(el("strong", null, r.c.displayTitle || r.c.title)); const useLabel = el("label"); useLabel.append(document.createTextNode(t.use + " ")); const useInput = el("input"); useInput.type = "number"; const [uMin, uMax, unit] = r.elec ? [10, 30, "kWh/100 km"] : [3, 12, "l/100 km"]; useInput.min = uMin; useInput.max = uMax; useInput.step = .1; useInput.value = r.use; useInput.style.width = "52px"; useInput.setAttribute("aria-label", `${r.c.displayTitle || r.c.title}: ${t.use} ${unit}`); useInput.onchange = () => { const n = Number(useInput.value); if (Number.isFinite(n)) costUse[r.c.id] = Math.min(uMax, Math.max(uMin, n)); saveCosts(); renderCosts(list); }; useLabel.append(useInput, document.createTextNode(" " + unit)); name.append(useLabel);
+      const bar = el("div", "cost-bar"); bar.setAttribute("role", "img"); bar.setAttribute("aria-label", `${r.c.displayTitle || r.c.title}: ` + parts(r).map(([, label, v]) => `${label} ${eur(v)}`).join(", "));
+      parts(r).forEach(([cls, , value]) => { const part = el("span", cls); part.style.width = (value / max * 100) + "%"; bar.append(part); });
+      const graph = el("div", "cost-graph"); graph.append(bar, el("div", "cost-detail", parts(r).map(([, label, v]) => `${label} ${eur(Math.round(v))}`).join(" · ")));
       const total = el("div", "cost-total", `${eur(Math.round(r.total))}${t.year}`); total.append(el("small", null, ` ${eur(Math.round(r.total / 12))}${t.month}`)); row.append(name, graph, total); wrap.append(row);
     }); host.append(wrap);
-    const key = el("div", "cost-key"); [["fuel", t.fuel], ["fixed", t.fees], ["repair", t.repair], ["loan", t.loan]].forEach(([cls, label]) => { const item = el("span"); item.append(el("i", cls), document.createTextNode(label)); key.append(item); }); host.append(key);
-    const note = el("p", "cost-note", t.note(fin().months, eur(fin().downPayment)) + " "); host.append(note);
+    const key = el("div", "cost-key"); [["fuel", t.fuel], ["fixed", t.fees], ["repair", t.repair], ...(fin().enabled ? [["loan", t.loan]] : [])].forEach(([cls, label]) => { const item = el("span"); item.append(el("i", cls), document.createTextNode(label)); key.append(item); }); host.append(key);
+    const note = el("p", "cost-note", fin().enabled ? t.note(fin().months, eur(fin().downPayment)) : t.noteNoLoan); host.append(note);
   }
 
   // ---------- header ----------
@@ -574,7 +582,7 @@ tr:last-child td { border-bottom: 0; }
     $("#maptitle").textContent = T.map; $("#charttitle").textContent = T.chart; $("#listtitle").textContent = T.list; $("#cmptitle").textContent = UX[lang].cmp; $("#howto").textContent = UX[lang].howto;
     const nav = $("#jumpnav"); nav.innerHTML = ""; ["visit", "decision", "costs", "listings", "explore", "compare"].forEach((id, i) => { const a = el("a", null, UX[lang].nav[i]); a.href = "#" + id; nav.append(a); });
     // Phone bar: filter toggle with the number of active filters, and map/chart tabs.
-    const active = F.statuses.size + F.models.size + !!F.query + F.savedOnly + F.affordable + (F.maxPrice < DEF.maxPrice) + (F.maxKm < DEF.maxKm) + (F.maxDrive !== DEF.maxDrive) + (F.includeUnverified !== DEF.includeUnverified) + F.carplay + F.cam + F.acc + !F.inCriteria + F.dealer + (!F.hideGone);
+    const active = F.statuses.size + F.models.size + !!F.query + F.savedOnly + (fin().enabled && F.affordable) + (F.maxPrice < DEF.maxPrice) + (F.maxKm < DEF.maxKm) + (F.maxDrive !== DEF.maxDrive) + (F.includeUnverified !== DEF.includeUnverified) + F.carplay + F.cam + F.acc + !F.inCriteria + F.dealer + (!F.hideGone);
     const fb = $("#fbtn"); fb.textContent = filtersOpen ? T.fClose : T.fBtn(active); fb.setAttribute("aria-pressed", filtersOpen); fb.onclick = () => { filtersOpen = !filtersOpen; document.body.classList.toggle("filters-open", filtersOpen); renderHeader(); };
     document.querySelectorAll(".tabs button").forEach(b => { b.textContent = b.dataset.tab === "map" ? T.tabMap : T.tabChart; b.setAttribute("aria-selected", b.dataset.tab === panelTab); b.onclick = () => { panelTab = b.dataset.tab; $(".panels").dataset.tab = panelTab; renderHeader(); if (panelTab === "map" && map) setTimeout(() => map.invalidateSize(), 50); }; });
     $(".panels").dataset.tab = panelTab;
@@ -600,12 +608,12 @@ tr:last-child td { border-bottom: 0; }
     const s2 = el("div"); s2.append(el("h3", null, T.fLimits));
     const rng = (key, label, min, max, step, fmt) => { const w = el("div", "range"); const l = el("label"); l.innerHTML = `<span>${label}</span><b>${fmt(F[key])}</b>`; const i = el("input"); i.type = "range"; i.min = min; i.max = max; i.step = step; i.value = F[key]; i.id = "f-" + key; i.oninput = () => { F[key] = +i.value; l.querySelector("b").textContent = fmt(F[key]); }; i.onchange = () => { saveF(); render(); }; w.append(l, i); return w; };
     s2.append(rng("maxPrice", T.maxPrice, 0, DEF.maxPrice, 250, eur), rng("maxKm", T.maxKm, 0, DEF.maxKm, 5000, km), rng("maxDrive", (P.distance.preferTransit ? T.maxDrive : T.maxDriveCar), 10, 600, 10, v => v + " " + T.min));
-    s2.append(el("p", "muted", T.transitNote));
+    s2.append(el("p", "muted", P.distance.preferTransit ? T.transitNote : T.driveNote));
     a.append(s2);
     const s3 = el("div"); s3.append(el("h3", null, T.fMust)); const tg = el("div", "toggles");
     [["includeUnverified", T.includeUnverified], ["carplay", T.needCarplay], ["cam", T.needCam], ["acc", T.needAcc], ["inCriteria", T.inCriteria], ["dealer", T.dealerOnly], ["hideGone", T.hideGone]].forEach(([k, l]) => { const lab = el("label"); const i = el("input"); i.type = "checkbox"; i.checked = !!F[k]; i.id = "t-" + k; i.onchange = () => { F[k] = i.checked; saveF(); render(); }; lab.append(i, document.createTextNode(l)); tg.append(lab); });
     s3.append(tg); a.append(s3);
-    const s4 = el("div"); s4.append(el("h3", null, T.fSort)); const sel = el("select"); sel.id = "sort"; Object.entries(T.sortOpts).forEach(([k, v]) => { const o = el("option", null, v); o.value = k; o.selected = k === F.sort; sel.append(o); }); sel.onchange = () => { F.sort = sel.value; saveF(); render(); }; s4.append(sel); a.append(s4);
+    const s4 = el("div"); s4.append(el("h3", null, T.fSort)); const sel = el("select"); sel.id = "sort"; Object.entries(T.sortOpts).forEach(([k, v]) => { const o = el("option", null, k === "drive" && !P.distance.preferTransit ? T.sortDriveCar : v); o.value = k; o.selected = k === F.sort; sel.append(o); }); sel.onchange = () => { F.sort = sel.value; saveF(); render(); }; s4.append(sel); a.append(s4);
     const r = el("button", "reset", T.reset); r.type = "button"; r.onclick = () => { F = { ...DEF, statuses: new Set(), models: new Set() }; saveF(); render(); }; a.append(r);
   }
 
@@ -656,17 +664,20 @@ tr:last-child td { border-bottom: 0; }
   }
 
   // ---------- map ----------
-  let map, markers;
+  let map, markers, homeMarker, homeKey = "";
   function renderMap(list) {
     if (!window.L) return;
     const vis = new Set(list.map(c => c.id));
+    const h = HOME(), key = h.lat + "," + h.lon + "," + h.label;
+    const fit = () => { const pts = list.filter(c => c.lat && c.lon).map(c => [c.lat, c.lon]); pts.push([h.lat, h.lon]); if (pts.length > 1) map.fitBounds(pts, { padding: [24, 24], maxZoom: 10 }); };
     if (!map) {
-      map = L.map("map", { scrollWheelZoom: false }).setView([HOME().lat, HOME().lon], 8);
+      map = L.map("map", { scrollWheelZoom: false }).setView([h.lat, h.lon], 8);
       L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { attribution: "© OpenStreetMap contributors", maxZoom: 18 }).addTo(map);
-      L.marker([HOME().lat, HOME().lon], { icon: L.divIcon({ className: "", html: '<div class="homepin"></div>', iconSize: [14, 14], iconAnchor: [7, 7] }), zIndexOffset: 1000 }).addTo(map).bindTooltip(HOME().label);
+      homeMarker = L.marker([h.lat, h.lon], { icon: L.divIcon({ className: "", html: '<div class="homepin"></div>', iconSize: [14, 14], iconAnchor: [7, 7] }), zIndexOffset: 1000 }).addTo(map).bindTooltip(h.label || T.home);
       markers = L.layerGroup().addTo(map);
-      const pts = list.filter(c => c.lat && c.lon).map(c => [c.lat, c.lon]); pts.push([HOME().lat, HOME().lon]);
-      if (pts.length > 1) map.fitBounds(pts, { padding: [24, 24], maxZoom: 10 });
+      homeKey = key; fit();
+    } else if (key !== homeKey) {
+      homeKey = key; homeMarker.setLatLng([h.lat, h.lon]); homeMarker.setTooltipContent(h.label || T.home); fit();
     }
     markers.clearLayers();
     cars.filter(c => c.lat && c.lon).forEach(c => {
@@ -730,7 +741,7 @@ tr:last-child td { border-bottom: 0; }
     const h = el("h2", null, c.displayTitle || c.title); const sb = el("span", "seller " + (isDealer(c) ? "d" : "p"), tf(c, "sellerType")); h.append(sb);
     if (c.gone) h.append(el("span", "tag gone", T.gone));
     if (c._crit.length) { const t = el("span", "tag out", UX[lang].outside); t.title = c._crit.map(critText).join(" · "); h.append(t); }
-    const l2 = el("div", "line2"); l2.innerHTML = `<b>${esc(engineTxt(c))}</b> · ${esc(tf(c, "dsgType") || c.gearbox || "")} · ${esc(c.city || c.location)} · <b>${esc(tripText(c))}</b>${tripMin(c) > 90 ? " · " + esc(T.transitLong) : ""}`;
+    const l2 = el("div", "line2"); l2.innerHTML = `<b>${esc(engineTxt(c))}</b> · ${esc(tf(c, "dsgType") || c.gearbox || "")} · ${esc(c.city || c.location)} · <b>${esc(tripText(c))}</b>${tripMin(c) > P.distance.maxDriveMin * 1.5 ? " · " + esc(T.transitLong) : ""}`;
     const facts = el("div", "facts");
     facts.append(el("span", "fact price " + factCls("price", c.price), eur(c.price) + (c.negotiable ? " " + T.neg : "")));
     if (fin().enabled) facts.append(el("span", "fact " + (loanMonthly(c.price, costPrefs.apr) <= loanCap() ? "good" : "bad"), eur(Math.round(loanMonthly(c.price, costPrefs.apr))) + " " + UX[lang].loan));
@@ -764,7 +775,7 @@ tr:last-child td { border-bottom: 0; }
     const f = el("div", "dfacts");
     const tr = el("div", "travel");
     const t1 = el("div"); t1.innerHTML = `<b>${esc(tripText(c))}</b>${tripMin(c) ? " · " + esc(T.transitApprox) : ""}`; tr.append(t1);
-    const t2 = el("div"); t2.innerHTML = `<b>${esc(c.location || c.city || "")}</b>${esc(c.transitCheckedAt ? T.transitNote : T.transitUnknown)}`; tr.append(t2);
+    const t2 = el("div"); t2.innerHTML = `<b>${esc(c.location || c.city || "")}</b>${esc(P.distance.preferTransit ? (c.transitCheckedAt ? T.transitNote : T.transitUnknown) : (driveMinutes(c) ? T.driveNote : T.tripUnknown))}`; tr.append(t2);
     const t3 = el("div"); t3.innerHTML = `<b>${esc(tf(c, "sellerName"))}</b>${esc(tf(c, "sellerType"))}${c.phone ? ` · ${T.phone} <span class="phone">${esc(c.phone)}</span>` : ""}`; tr.append(t3);
     f.append(tr);
     const dl = el("dl", "specs");
@@ -778,7 +789,7 @@ tr:last-child td { border-bottom: 0; }
     const links = el("div", "links");
     const a = el("a", "primary", T.listing); a.href = c.url; a.target = "_blank"; a.rel = "noopener"; links.append(a);
     if (c.mapsUrl) { const m = el("a", null, T.route); m.href = c.mapsUrl; m.target = "_blank"; m.rel = "noopener"; links.append(m); }
-    { const b = el("a", null, T.train); b.href = transitUrl(c); b.target = "_blank"; b.rel = "noopener"; links.append(b); }
+    if (P.distance.preferTransit) { const b = el("a", null, T.train); b.href = transitUrl(c); b.target = "_blank"; b.rel = "noopener"; links.append(b); }
     if (c.phone) { const b = el("button", "btn", T.copy); b.type = "button"; b.onclick = () => { try { navigator.clipboard.writeText(c.phone).then(() => { b.textContent = T.copied; setTimeout(() => b.textContent = T.copy, 1200); }); } catch (e) {} }; links.append(b); }
     f.append(links); head.append(f); d.append(head);
 
@@ -825,7 +836,7 @@ tr:last-child td { border-bottom: 0; }
     const val = (c, k) => k === "title" ? (c.displayTitle || c.title) : k === "kmyr" ? (kmPerYear(c) || 0) : k === "year" ? c.regYear * 100 + c.regMonth : k === "dsg" ? gearboxLabel(c) : k === "drive" ? (tripMin(c) ?? 999) : k === "seller" ? (isDealer(c) ? 0 : 1) : k === "belt" ? (tf(c, "timingBelt") || "") : k === "carplay" ? ((c.equip || {}).carplay ? 1 : 0) : k === "camera" ? ((c.equip || {}).camera ? 1 : 0) : k === "status" ? (STATUS_RANK[c.status] ?? 5) : c[k];
     const rows = costSelected.map(id => cars.find(c => c.id === id)).filter(Boolean).sort((a, b) => { const x = val(a, tableSort.k), y = val(b, tableSort.k); return (typeof x === "string" ? x.localeCompare(y) : (x ?? 0) - (y ?? 0)) * tableSort.dir; });
     const thead = el("thead"); const hr = el("tr"); const numCols = [1, 2, 3, 4, 5, 6, 8];
-    T.cols.forEach((h, i) => { const th = el("th", (numCols.includes(i) ? "num" : "") + (tableSort.k === keys[i] ? " sorted" : ""), h + (tableSort.k === keys[i] ? (tableSort.dir > 0 ? " ↑" : " ↓") : "")); th.onclick = () => { if (tableSort.k === keys[i]) tableSort.dir *= -1; else tableSort = { k: keys[i], dir: keys[i] === "score" ? -1 : 1 }; renderTable(visible()); }; hr.append(th); });
+    T.cols.forEach((h, i) => { if (i === 8 && !P.distance.preferTransit) h = T.colDriveCar; const th = el("th", (numCols.includes(i) ? "num" : "") + (tableSort.k === keys[i] ? " sorted" : ""), h + (tableSort.k === keys[i] ? (tableSort.dir > 0 ? " ↑" : " ↓") : "")); th.onclick = () => { if (tableSort.k === keys[i]) tableSort.dir *= -1; else tableSort = { k: keys[i], dir: keys[i] === "score" ? -1 : 1 }; renderTable(visible()); }; hr.append(th); });
     thead.append(hr); t.append(thead); const tb = el("tbody");
     rows.forEach(c => { const tr = el("tr"); const td0 = el("td"); const a = el("a", null, c.displayTitle || c.title); a.href = "#car-" + c.id; a.onclick = e => { e.preventDefault(); openCar(c.id); }; td0.append(a); if (c.pick) td0.append(document.createTextNode(" ✓")); tr.append(td0);
       const ts = el("td", "num"); ts.append(el("span", "sc", String(c.score ?? "–"))); ts.firstChild.style.color = scoreColor(c.score); tr.append(ts);
@@ -843,7 +854,7 @@ tr:last-child td { border-bottom: 0; }
   function save(id, patch, noteEl) {
     if (readOnly) return;
     saving = saving.then(() => fetch("/api/cars/" + encodeURIComponent(id), { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(patch) }).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }))
-      .then(j => { const i = cars.findIndex(c => c.id === id); if (i >= 0) cars[i] = { id, ...j.car }; render(); if (noteEl) { noteEl.textContent = T.saved; setTimeout(() => noteEl.textContent = "", 1500); } })
+      .then(j => { const i = cars.findIndex(c => c.id === id); if (i >= 0) cars[i] = toList({ [id]: j.car })[0]; render(); const n = noteEl && (document.querySelector(`#car-${CSS.escape(id)} .saved`) || noteEl); if (n) { n.textContent = T.saved; setTimeout(() => n.textContent = "", 1500); } })
       .catch(e => { if (noteEl) noteEl.textContent = T.saveFail; });
   }
 
