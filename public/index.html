@@ -36,11 +36,10 @@ header.top h1 { font-size: 26px; font-weight: 700; letter-spacing: -0.02em; }
 header.top .sub { color: var(--muted); margin-top: 3px; font-size: 13.5px; }
 .hright { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .lang { display: inline-flex; border: 1px solid var(--line); border-radius: 7px; overflow: hidden; }
-.lang button { background: var(--surface); border: 0; padding: 6px 11px; font-size: 12.5px; font-weight: 600; cursor: pointer; color: var(--muted); }
+.lang button { background: var(--surface); border: 0; padding: 6px 11px; font-size: 12.5px; font-weight: 600; cursor: pointer; color: var(--muted); white-space: nowrap; }
 .lang button + button { border-left: 1px solid var(--line); }
 .lang button[aria-pressed="true"] { background: var(--accent); color: var(--accent-fg); }
 .newpill { background: var(--good-bg); color: var(--good); font-weight: 700; font-size: 13px; padding: 6px 11px; border-radius: 999px; cursor: pointer; border: 0; }
-.newpill[hidden] { display: none; }
 
 .layout { display: grid; grid-template-columns: 260px 1fr; gap: 16px; align-items: start; }
 @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } }
@@ -144,6 +143,16 @@ aside select { width: 100%; background: var(--surface); border: 1px solid var(--
 .thumbwrap { position: relative; }
 .row .thumb { width: 128px; aspect-ratio: 4/3; object-fit: cover; border-radius: 6px; display: block; background: var(--surface-2); max-width: 100%; }
 .badge-new { position: absolute; top: 6px; left: 6px; }
+.ph { display: grid; place-items: center; color: var(--muted); background: var(--surface-2); border-radius: 6px; aspect-ratio: 4/3; }
+.ph svg { width: 44%; max-width: 72px; height: auto; opacity: .7; }
+.row .thumb.ph { display: grid; }
+.photos .mainimg.ph { display: grid; border-radius: 0; width: 100%; }
+.welcome { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 28px 24px; display: grid; gap: 10px; justify-items: start; }
+.welcome h2 { font-size: 22px; }
+.welcome p { margin: 0; color: var(--muted); max-width: 60ch; }
+.welcome-actions { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; margin-top: 6px; }
+.welcome-actions .btn { height: 40px; padding: 0 18px; border-radius: 999px; font-size: 14px; }
+.ring.est .n { font-size: 15px; }
 .rowmain { min-width: 0; display: grid; gap: 5px; }
 .rowmain h2 { font-size: 16.5px; font-weight: 600; line-height: 1.25; display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: baseline; }
 .rowmain h2 .seller { font: 500 11.5px/1 var(--body); letter-spacing: 0; padding: 4px 7px; border-radius: 5px; }
@@ -249,7 +258,14 @@ tr:last-child td { border-bottom: 0; }
   body { padding-inline: 12px; font-size: 14px; }
   header.top { padding-block: 14px 10px; gap: 8px; }
   header.top h1 { font-size: 23px; }
-  header.top .sub { font-size: 12.5px; }
+  header.top .sub { font-size: 12.5px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  header.top > div:first-child { min-width: 0; width: 100%; }
+  .hright { gap: 6px; flex-wrap: nowrap; }
+  .hright .chip { padding: 5px 9px; white-space: nowrap; }
+  .jumpnav { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin-inline: -12px; padding-inline: 12px; scroll-padding-inline: 12px; }
+  .jumpnav::-webkit-scrollbar { display: none; }
+  .jumpnav a { white-space: nowrap; flex: none; }
+  .ring.est .n { font-size: 12.5px; }
   .hright { width: 100%; justify-content: space-between; }
   .lang button { padding: 6px 9px; font-size: 12px; }
   .mbar { display: flex; gap: 8px; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 1200; background: var(--bg); padding: 8px 0; margin-bottom: 4px; }
@@ -361,13 +377,14 @@ body.setup .wrap{display:none}
     <aside class="filters" id="filters"></aside>
     <div class="main">
       <nav class="jumpnav" id="jumpnav" aria-label="Page sections"></nav>
+      <section class="welcome" id="welcome" hidden></section>
       <div class="kpis" id="kpis"></div>
       <section class="decision visit" id="visit" hidden></section>
       <section class="decision" id="decision"></section>
       <div class="updates" id="updates" hidden></div>
-      <section class="costs" id="costs"></section>
       <div class="listhead" id="listings"><h2 id="listtitle"></h2><div class="actions"><span class="muted" id="count"></span></div></div>
       <div class="cards" id="cards"><p class="empty" id="loading"></p></div>
+      <section class="costs" id="costs"></section>
       <div class="panels" id="explore">
         <div class="panel"><h3 id="maptitle"></h3><div id="map"></div><div class="legend" id="maplegend"></div></div>
         <div class="panel chart"><h3 id="charttitle"></h3><div id="chart"></div><div class="legend" id="chartlegend"></div></div>
@@ -385,14 +402,16 @@ body.setup .wrap{display:none}
 (function () {
   let P = null, CAT = [];
   const HOME = () => (P && P.home) || { lat: 51.1657, lon: 10.4515, label: "" };
+  // Home as stored; long geocoder-style labels are cut to their first two comma-separated parts.
+  const homeShort = () => { const l = String(HOME().label || "").trim(); return l.length > 40 ? l.split(",").map(x => x.trim()).filter(Boolean).slice(0, 2).join(", ") : l; };
   const I18N = {
     en: { locale: "en-GB",
-      sub: (n, d) => `${n} cars tracked · last listing check ${d || "–"}${HOME().label ? " · from " + HOME().label : ""}`,
+      sub: (n, d, h) => `${n} ${n === 1 ? "car" : "cars"} tracked${d ? " · last listing check " + d : ""}${h ? " · from " + h : ""}`,
       newSince: n => `${n} new since your last visit`, allSeen: "Mark all as seen",
       status: { candidate: "Not contacted", contacted: "Contacted", replied: "Replied", call: "Call seller", viewing: "Viewing planned", declined: "Seller declined", dropped: "Dropped", bought: "Bought" },
       fModel: "Model", eqMaybe: "Not listed, but usually fitted on this model year. Confirm with the seller.",
       kmYear: "km/yr", usageHigh: "motorway", usageLow: "lower use", kmYearTip: "Average distance per year since first registration. This alone does not show whether trips were long or short; ask about the car's use.",
-      fStatus: "Status", fLimits: "Limits", fMust: "Must have", fSort: "Sort by", reset: "Reset filters", fBtn: n => "Filters" + (n ? " · " + n : ""), fClose: "Hide filters", tabMap: "Map", tabChart: "Chart",
+      fStatus: "Status", fLimits: "Limits", fMust: "Must have", fShow: "Show", fSort: "Sort by", reset: "Reset filters", fBtn: n => "Filters" + (n ? " · " + n : ""), fClose: "Hide filters", tabMap: "Map", tabChart: "Chart",
       maxPrice: "Max price", maxKm: "Max mileage", maxDrive: "Max transit time (one way)", maxDriveCar: "Max driving time (one way)", driveNote: "Driving times by car from home, from OpenStreetMap routing; traffic not included.", tripUnknown: "Travel time unknown", sortDriveCar: "Driving time", colDriveCar: "Drive", min: "min", transit: "by public transport", transitUnknown: "Transit time unverified", transitApprox: "to listing area; confirm seller address", transitLong: "Long trip", includeUnverified: "Show cars with unverified journey time", transitNote: "Times include walking and transfers from home. Based on a weekday journey to the listing area; check the exact seller address and departure before visiting.",
       needCarplay: "CarPlay", needCam: "Rear camera", needAcc: "Adaptive cruise (ACC)", inCriteria: "Only cars that match my criteria", dealerOnly: "Dealer only (legal warranty)", hideGone: "Hide sold / gone",
       sortOpts: { rec: "Recommendation", score: "Score", reply: "Seller reply", price: "Price", km: "Mileage", year: "Year (newest)", drive: "Transit time", value: "Value (score per €1,000)" },
@@ -412,12 +431,12 @@ body.setup .wrap{display:none}
       saved: "Saved", saveFail: "Could not save", pick: "Shortlist", picked: "Shortlisted", priceHist: "Price history",
       cmp: "Side by side", cols: ["Car", "Score", "Price", "km", "km/yr", "Year", "hp", "Gearbox", "Transit", "Seller", "Belt", "CarPlay", "Camera", "Status"] },
     de: { locale: "de-DE",
-      sub: (n, d) => `${n} Autos im Blick · letzte Inseratsprüfung ${d || "–"}${HOME().label ? " · ab " + HOME().label : ""}`,
+      sub: (n, d, h) => `${n} ${n === 1 ? "Auto" : "Autos"} im Blick${d ? " · letzte Inseratsprüfung " + d : ""}${h ? " · ab " + h : ""}`,
       newSince: n => `${n} neu seit deinem letzten Besuch`, allSeen: "Alle als gesehen markieren",
       status: { candidate: "Noch nicht angefragt", contacted: "Angefragt", replied: "Antwort da", call: "Anrufen", viewing: "Besichtigung geplant", declined: "Verkäufer lehnt ab", dropped: "Gestrichen", bought: "Gekauft" },
       fModel: "Modell", eqMaybe: "Nicht angegeben, in diesem Modelljahr aber meist verbaut. Beim Verkäufer bestätigen.",
       kmYear: "km/Jahr", usageHigh: "Langstrecke", usageLow: "weniger gefahren", kmYearTip: "Durchschnittliche Jahresfahrleistung seit Erstzulassung. Daraus lässt sich nicht erkennen, ob Lang- oder Kurzstrecken gefahren wurden; beim Verkäufer nachfragen.",
-      fStatus: "Status", fLimits: "Grenzen", fMust: "Muss haben", fSort: "Sortieren nach", reset: "Filter zurücksetzen", fBtn: n => "Filter" + (n ? " · " + n : ""), fClose: "Filter ausblenden", tabMap: "Karte", tabChart: "Diagramm",
+      fStatus: "Status", fLimits: "Grenzen", fMust: "Muss haben", fShow: "Anzeigen", fSort: "Sortieren nach", reset: "Filter zurücksetzen", fBtn: n => "Filter" + (n ? " · " + n : ""), fClose: "Filter ausblenden", tabMap: "Karte", tabChart: "Diagramm",
       maxPrice: "Max. Preis", maxKm: "Max. Kilometer", maxDrive: "Max. ÖPNV-Fahrzeit (einfach)", maxDriveCar: "Max. Fahrzeit mit dem Auto (einfach)", driveNote: "Fahrzeiten mit dem Auto ab Zuhause, berechnet mit OpenStreetMap-Routing; ohne Verkehr.", tripUnknown: "Fahrzeit unbekannt", sortDriveCar: "Fahrzeit", colDriveCar: "Fahrzeit", min: "Min.", transit: "mit Bus & Bahn", transitUnknown: "ÖPNV-Zeit ungeprüft", transitApprox: "bis zum Inseratsgebiet; Verkäuferadresse prüfen", transitLong: "Lange Anfahrt", includeUnverified: "Autos mit ungeprüfter Anfahrt zeigen", transitNote: "Die Zeiten enthalten Fußwege und Umstiege ab Zuhause. Grundlage ist eine Werktagsverbindung bis zum Inseratsgebiet. Vor dem Besuch die genaue Verkäuferadresse und Abfahrt prüfen.",
       needCarplay: "CarPlay", needCam: "Rückfahrkamera", needAcc: "Abstandstempomat (ACC)", inCriteria: "Nur Autos, die zu meinen Kriterien passen", dealerOnly: "Nur Händler (Gewährleistung)", hideGone: "Verkaufte ausblenden",
       sortOpts: { rec: "Empfehlung", score: "Punkte", reply: "Verkäuferantwort", price: "Preis", km: "Kilometer", year: "Baujahr (neueste)", drive: "ÖPNV-Fahrzeit", value: "Preis-Leistung (Punkte je 1.000 €)" },
@@ -437,12 +456,12 @@ body.setup .wrap{display:none}
       saved: "Gespeichert", saveFail: "Speichern fehlgeschlagen", pick: "Vormerken", picked: "Vorgemerkt", priceHist: "Preisverlauf",
       cmp: "Im Vergleich", cols: ["Auto", "Punkte", "Preis", "km", "km/Jahr", "Baujahr", "PS", "Getriebe", "ÖPNV", "Verkäufer", "Zahnriemen", "CarPlay", "Kamera", "Status"] },
     pt: { locale: "pt-BR",
-      sub: (n, d) => `${n} carros acompanhados · última verificação dos anúncios ${d || "–"}${HOME().label ? " · a partir de " + HOME().label : ""}`,
+      sub: (n, d, h) => `${n} ${n === 1 ? "carro acompanhado" : "carros acompanhados"}${d ? " · última verificação dos anúncios " + d : ""}${h ? " · a partir de " + h : ""}`,
       newSince: n => `${n} novos desde sua última visita`, allSeen: "Marcar todos como vistos",
       status: { candidate: "Não contatado", contacted: "Contatado", replied: "Respondeu", call: "Ligar", viewing: "Visita marcada", declined: "Vendedor recusou", dropped: "Descartado", bought: "Comprado" },
       fModel: "Modelo", eqMaybe: "Não listado, mas geralmente presente neste ano-modelo. Confirme com o vendedor.",
       kmYear: "km/ano", usageHigh: "rodovia", usageLow: "menos uso", kmYearTip: "Distância média por ano desde o primeiro emplacamento. Isso não mostra se os trajetos foram longos ou curtos; pergunte ao vendedor.",
-      fStatus: "Status", fLimits: "Limites", fMust: "Obrigatório", fSort: "Ordenar por", reset: "Limpar filtros", fBtn: n => "Filtros" + (n ? " · " + n : ""), fClose: "Ocultar filtros", tabMap: "Mapa", tabChart: "Gráfico",
+      fStatus: "Status", fLimits: "Limites", fMust: "Obrigatório", fShow: "Mostrar", fSort: "Ordenar por", reset: "Limpar filtros", fBtn: n => "Filtros" + (n ? " · " + n : ""), fClose: "Ocultar filtros", tabMap: "Mapa", tabChart: "Gráfico",
       maxPrice: "Preço máx.", maxKm: "Km máx.", maxDrive: "Tempo máx. transporte público (ida)", maxDriveCar: "Tempo máx. de carro (ida)", driveNote: "Tempos de carro desde casa, calculados com roteamento do OpenStreetMap; sem trânsito.", tripUnknown: "Tempo de viagem desconhecido", sortDriveCar: "Tempo de carro", colDriveCar: "Carro", min: "min", transit: "de transporte público", transitUnknown: "Tempo não verificado", transitApprox: "até a área do anúncio; confirmar endereço", transitLong: "Viagem longa", includeUnverified: "Mostrar carros com viagem não verificada", transitNote: "Os tempos incluem caminhada e baldeações desde casa. Baseados em dia útil até a área do anúncio; confira o endereço exato e o horário antes da visita.",
       needCarplay: "CarPlay", needCam: "Câmera de ré", needAcc: "Piloto adaptativo (ACC)", inCriteria: "Só carros dentro dos meus critérios", dealerOnly: "Só lojas (garantia legal)", hideGone: "Ocultar vendidos",
       sortOpts: { rec: "Recomendação", score: "Pontuação", reply: "Resposta do vendedor", price: "Preço", km: "Quilometragem", year: "Ano (mais novo)", drive: "Transporte público", value: "Custo-benefício (pontos por € 1.000)" },
@@ -468,16 +487,19 @@ body.setup .wrap{display:none}
     pt: { title: "Quanto custa cada carro?", intro: "Estimativa de planejamento. Escolha até seis carros e ajuste as premissas.", km: "km/ano", apr: "Juros anuais %", insurance: "Seguro €/ano", upkeep: "Revisões + reserva para reparos €/ano", fixed: "Imposto + inspeção €/ano", fuel: "Combustível", fees: "Seguro + imposto + inspeção", repair: "Revisões + reparos", loan: "Financiamento", year: "/ano", month: "/mês", use: "Consumo", note: (n, down) => `As barras mostram os gastos anuais, incluindo ${n} parcelas com entrada de ${down} e sem parcela final. O consumo é uma estimativa ajustável, não uma medição deste carro. Seguro, imposto e reparos variam; peça cotações e confira o histórico de manutenção. Depreciação e revenda não estão incluídas.`, noteNoLoan: "As barras mostram os gastos anuais. O consumo é uma estimativa ajustável, não uma medição deste carro. Seguro, imposto e reparos variam; peça cotações e confira o histórico de manutenção. Depreciação e revenda não estão incluídas.", pick: "Carros para comparar" }
   };
   const UX = {
-    en: { visitTitle: "Replied and worth a visit", visitHint: "Sellers who answered and whose car is worth seeing, in order.", visitNext: "Next", nav: ["Visit", "Focus", "Costs", "Listings", "Map & chart", "Compare"], focus: "Cars worth a closer look", focusHint: "Shortlisted cars first, then the highest rated available listings. Scores summarize evidence; check the documents before deciding.", loan: "loan/month", loanLimit: cap => `${cap} loan limit`, maxPriceLine: "max price", score: "score", reply: "Seller reply", replyHint: "Answers and inspection access; seller claims are not yet verified.", compare: "Compare costs", comparing: "In cost comparison", shortlist: "Shortlist", shortlisted: "Shortlisted", search: "Search car, city or seller", savedOnly: "Shortlist only", affordable: cap => `Loan ≤ ${cap}/month`, more: "Show 12 more", all: "All shown", cmp: "Selected cars side by side", howto: "Scores combine the ratings you weight in Settings: mileage and age, maintenance records, gearbox, seller and warranty, price, distance and equipment. Filters, map and chart work together: narrow the list, click a marker or dot to open that car. Shortlisting a car does not contact anyone.", noFocus: "No available cars match your filters.", details: "Open details",
-      outside: "Outside your criteria",
+    en: { visitTitle: "Replied and worth a visit", visitHint: "Sellers who answered and whose car is worth seeing, in order.", visitNext: "Next", nav: { visit: "Visit", decision: "Focus", listings: "Listings", costs: "Costs", explore: "Map & chart", compare: "Compare" }, focus: "Cars worth a closer look", focusHint: "Shortlisted cars first, then the highest rated available listings. Scores summarize evidence; check the documents before deciding.", loan: "loan/month", loanLimit: cap => `${cap} loan limit`, maxPriceLine: "max price", score: "score", reply: "Seller reply", replyHint: "Answers and inspection access; seller claims are not yet verified.", compare: "Compare costs", comparing: "In cost comparison", shortlist: "Shortlist", shortlisted: "Shortlisted", search: "Search car, city or seller", savedOnly: "Shortlist only", affordable: cap => `Loan ≤ ${cap}/month`, more: "Show 12 more", all: "All shown", cmp: "Selected cars side by side", howto: "Scores combine the ratings you weight in Settings: mileage and age, maintenance records, gearbox, seller and warranty, price, distance and equipment. Filters, map and chart work together: narrow the list, click a marker or dot to open that car. Shortlisting a car does not contact anyone.", noFocus: "No available cars match your filters.", details: "Open details",
+      outside: "Outside your criteria", estTip: "Estimated from price, mileage, distance and equipment",
+      welcomeTitle: "No cars yet", welcomeText: "Add a listing you like and Car Hunt ranks it against your criteria, or let the optional Claude routine find and check listings for you.", welcomeRoutine: "Automate it with the Claude routine",
       fuels: { diesel: "Diesel", petrol: "Petrol", hybrid: "Hybrid", plugin: "Plug-in hybrid", electric: "Electric", lpg: "LPG" }, gearboxes: { automatic: "Automatic", manual: "Manual" },
       crit: { fuel: v => `Fuel: ${v}`, gearbox: v => `Gearbox: ${v}`, make: v => `Make: ${v}`, price: v => `Price ${v}`, km: v => `Mileage ${v}`, year: v => `Year ${v}`, hp: v => `${v} hp`, drive: v => `${v} min away`, equip: v => `Missing: ${v}`, avoid: v => v } },
-    de: { visitTitle: "Geantwortet und eine Besichtigung wert", visitHint: "Verkäufer, die geantwortet haben und deren Auto sich anzusehen lohnt, in Reihenfolge.", visitNext: "Nächster Schritt", nav: ["Besichtigen", "Im Fokus", "Kosten", "Inserate", "Karte & Diagramm", "Vergleich"], focus: "Autos für die engere Auswahl", focusHint: "Zuerst vorgemerkte Autos, dann die bestbewerteten verfügbaren Inserate. Punkte fassen Belege zusammen; Unterlagen vor der Entscheidung prüfen.", loan: "Kredit/Monat", loanLimit: cap => `${cap} Kreditlimit`, maxPriceLine: "Höchstpreis", score: "Punkte", reply: "Verkäuferantwort", replyHint: "Antworten und unabhängige Prüfung; Verkäuferaussagen sind noch nicht belegt.", compare: "Kosten vergleichen", comparing: "Im Kostenvergleich", shortlist: "Vormerken", shortlisted: "Vorgemerkt", search: "Auto, Ort oder Verkäufer suchen", savedOnly: "Nur vorgemerkte", affordable: cap => `Kredit ≤ ${cap}/Monat`, more: "12 weitere zeigen", all: "Alle angezeigt", cmp: "Ausgewählte Autos im Vergleich", howto: "Die Punkte kombinieren die Bewertungen, die du in den Einstellungen gewichtest: Laufleistung und Alter, Wartungsnachweise, Getriebe, Verkäufer und Gewährleistung, Preis, Entfernung und Ausstattung. Filter, Karte und Diagramm arbeiten zusammen: Liste eingrenzen, Marker oder Punkt anklicken, Auto öffnet sich. Vormerken schreibt niemanden an.", noFocus: "Keine verfügbaren Autos passen zu den Filtern.", details: "Details öffnen",
-      outside: "Außerhalb deiner Kriterien",
+    de: { visitTitle: "Geantwortet und eine Besichtigung wert", visitHint: "Verkäufer, die geantwortet haben und deren Auto sich anzusehen lohnt, in Reihenfolge.", visitNext: "Nächster Schritt", nav: { visit: "Besichtigen", decision: "Im Fokus", listings: "Inserate", costs: "Kosten", explore: "Karte & Diagramm", compare: "Vergleich" }, focus: "Autos für die engere Auswahl", focusHint: "Zuerst vorgemerkte Autos, dann die bestbewerteten verfügbaren Inserate. Punkte fassen Belege zusammen; Unterlagen vor der Entscheidung prüfen.", loan: "Kredit/Monat", loanLimit: cap => `${cap} Kreditlimit`, maxPriceLine: "Höchstpreis", score: "Punkte", reply: "Verkäuferantwort", replyHint: "Antworten und unabhängige Prüfung; Verkäuferaussagen sind noch nicht belegt.", compare: "Kosten vergleichen", comparing: "Im Kostenvergleich", shortlist: "Vormerken", shortlisted: "Vorgemerkt", search: "Auto, Ort oder Verkäufer suchen", savedOnly: "Nur vorgemerkte", affordable: cap => `Kredit ≤ ${cap}/Monat`, more: "12 weitere zeigen", all: "Alle angezeigt", cmp: "Ausgewählte Autos im Vergleich", howto: "Die Punkte kombinieren die Bewertungen, die du in den Einstellungen gewichtest: Laufleistung und Alter, Wartungsnachweise, Getriebe, Verkäufer und Gewährleistung, Preis, Entfernung und Ausstattung. Filter, Karte und Diagramm arbeiten zusammen: Liste eingrenzen, Marker oder Punkt anklicken, Auto öffnet sich. Vormerken schreibt niemanden an.", noFocus: "Keine verfügbaren Autos passen zu den Filtern.", details: "Details öffnen",
+      outside: "Außerhalb deiner Kriterien", estTip: "Geschätzt aus Preis, Kilometerstand, Entfernung und Ausstattung",
+      welcomeTitle: "Noch keine Autos", welcomeText: "Füge ein Inserat hinzu, das dir gefällt, und Car Hunt ordnet es nach deinen Kriterien ein, oder lass die optionale Claude-Routine Inserate für dich finden und prüfen.", welcomeRoutine: "Mit der Claude-Routine automatisieren",
       fuels: { diesel: "Diesel", petrol: "Benzin", hybrid: "Hybrid", plugin: "Plug-in-Hybrid", electric: "Elektro", lpg: "Autogas" }, gearboxes: { automatic: "Automatik", manual: "Schaltgetriebe" },
       crit: { fuel: v => `Kraftstoff: ${v}`, gearbox: v => `Getriebe: ${v}`, make: v => `Marke: ${v}`, price: v => `Preis ${v}`, km: v => `Laufleistung ${v}`, year: v => `Baujahr ${v}`, hp: v => `${v} PS`, drive: v => `${v} Min. entfernt`, equip: v => `Fehlt: ${v}`, avoid: v => v } },
-    pt: { visitTitle: "Responderam e valem uma visita", visitHint: "Vendedores que responderam e cujo carro vale a pena ver, em ordem.", visitNext: "Próximo passo", nav: ["Visitar", "Destaques", "Custos", "Anúncios", "Mapa e gráfico", "Comparar"], focus: "Carros para olhar de perto", focusHint: "Primeiro os salvos, depois os anúncios disponíveis com melhor nota. Confira os documentos antes de decidir.", loan: "crédito/mês", loanLimit: cap => `limite ${cap}/mês`, maxPriceLine: "preço máx.", score: "pontos", reply: "Resposta do vendedor", replyHint: "Respostas e vistoria independente; informações ainda não verificadas.", compare: "Comparar custos", comparing: "Na comparação de custos", shortlist: "Salvar", shortlisted: "Salvo", search: "Buscar carro, cidade ou vendedor", savedOnly: "Só salvos", affordable: cap => `Crédito ≤ ${cap}/mês`, more: "Mostrar mais 12", all: "Todos exibidos", cmp: "Carros escolhidos lado a lado", howto: "A pontuação combina as notas que você pondera nas Configurações: quilometragem e idade, manutenção, câmbio, vendedor e garantia, preço, distância e equipamentos. Filtros, mapa e gráfico trabalham juntos: restrinja a lista, clique num marcador ou ponto para abrir o carro. Salvar um carro não contata ninguém.", noFocus: "Nenhum carro disponível corresponde aos filtros.", details: "Abrir detalhes",
-      outside: "Fora dos seus critérios",
+    pt: { visitTitle: "Responderam e valem uma visita", visitHint: "Vendedores que responderam e cujo carro vale a pena ver, em ordem.", visitNext: "Próximo passo", nav: { visit: "Visitar", decision: "Destaques", listings: "Anúncios", costs: "Custos", explore: "Mapa e gráfico", compare: "Comparar" }, focus: "Carros para olhar de perto", focusHint: "Primeiro os salvos, depois os anúncios disponíveis com melhor nota. Confira os documentos antes de decidir.", loan: "crédito/mês", loanLimit: cap => `limite ${cap}/mês`, maxPriceLine: "preço máx.", score: "pontos", reply: "Resposta do vendedor", replyHint: "Respostas e vistoria independente; informações ainda não verificadas.", compare: "Comparar custos", comparing: "Na comparação de custos", shortlist: "Salvar", shortlisted: "Salvo", search: "Buscar carro, cidade ou vendedor", savedOnly: "Só salvos", affordable: cap => `Crédito ≤ ${cap}/mês`, more: "Mostrar mais 12", all: "Todos exibidos", cmp: "Carros escolhidos lado a lado", howto: "A pontuação combina as notas que você pondera nas Configurações: quilometragem e idade, manutenção, câmbio, vendedor e garantia, preço, distância e equipamentos. Filtros, mapa e gráfico trabalham juntos: restrinja a lista, clique num marcador ou ponto para abrir o carro. Salvar um carro não contata ninguém.", noFocus: "Nenhum carro disponível corresponde aos filtros.", details: "Abrir detalhes",
+      outside: "Fora dos seus critérios", estTip: "Estimada a partir de preço, quilometragem, distância e equipamentos",
+      welcomeTitle: "Nenhum carro ainda", welcomeText: "Adicione um anúncio de que você gostou e o Car Hunt o classifica pelos seus critérios, ou deixe a rotina opcional do Claude encontrar e verificar anúncios para você.", welcomeRoutine: "Automatizar com a rotina do Claude",
       fuels: { diesel: "Diesel", petrol: "Gasolina", hybrid: "Híbrido", plugin: "Híbrido plug-in", electric: "Elétrico", lpg: "GLP" }, gearboxes: { automatic: "Automático", manual: "Manual" },
       crit: { fuel: v => `Combustível: ${v}`, gearbox: v => `Câmbio: ${v}`, make: v => `Marca: ${v}`, price: v => `Preço ${v}`, km: v => `Quilometragem ${v}`, year: v => `Ano ${v}`, hp: v => `${v} cv`, drive: v => `a ${v} min`, equip: v => `Falta: ${v}`, avoid: v => v } }
   };
@@ -621,20 +643,38 @@ body.setup .wrap{display:none}
   }
 
   // ---------- header ----------
+  const HEAD_LABELS = { en: ["Add a car", "Settings"], de: ["Auto hinzufügen", "Einstellungen"], pt: ["Adicionar carro", "Configurações"] };
+  const addCar = () => Setup.addCar({ lang, onSaved: () => load() });
+  const scoreTxt = c => c.score == null ? "–" : (c.scoreEstimated ? "≈" : "") + c.score;
+  const estTitle = (node, c) => { if (c && c.scoreEstimated) node.title = UX[lang].estTip; return node; };
+  // First run: no cars yet. A welcome card replaces the panels that need data.
+  function renderWelcome() {
+    const host = $("#welcome"), empty = !cars.length; host.hidden = !empty; host.innerHTML = "";
+    ["kpis", "visit", "decision", "updates", "listings", "cards", "costs", "explore", "compare"].forEach(id => { const n = document.getElementById(id); if (empty) n.hidden = true; else if (!["visit", "updates"].includes(id)) n.hidden = false; });
+    $(".tabs").hidden = empty;
+    if (!empty) return;
+    const t = UX[lang];
+    const b = el("button", "btn primary", HEAD_LABELS[lang][0]); b.type = "button"; b.onclick = addCar;
+    const a = el("a", null, t.welcomeRoutine); a.href = "https://github.com/DasMehl/car-hunt/blob/main/routine/README.md"; a.target = "_blank"; a.rel = "noopener";
+    const acts = el("div", "welcome-actions"); acts.append(b, a);
+    host.append(el("h2", null, t.welcomeTitle), el("p", null, t.welcomeText), acts);
+  }
   function renderHeader() {
     $("#apptitle").textContent = P.name; document.title = P.name;
     document.querySelectorAll(".lang button").forEach(b => b.hidden = !P.languages.includes(b.dataset.lang));
     document.documentElement.lang = T.locale;
-    $("#sub").textContent = T.sub(cars.length, meta.lastCheck ? fmtDate(meta.lastCheck) : null);
+    $("#sub").textContent = T.sub(cars.length, meta.lastCheck ? fmtDate(meta.lastCheck) : null, homeShort());
     document.querySelectorAll(".lang button").forEach(b => b.setAttribute("aria-pressed", b.dataset.lang === lang));
     const n = cars.filter(isNew).length; const p = $("#newpill");
     p.hidden = !n; p.textContent = T.newSince(n);
     p.onclick = () => { try { localStorage.setItem("carhunt-lastvisit", new Date().toISOString()); } catch (e) {} lastVisit = new Date().toISOString(); render(); };
-    const ax = { en: ["Add a car", "Settings"], de: ["Auto hinzufügen", "Einstellungen"], pt: ["Adicionar carro", "Configurações"] }[lang];
-    $("#addcar").textContent = ax[0]; $("#addcar").onclick = () => Setup.addCar({ lang, onSaved: () => load() });
+    const ax = HEAD_LABELS[lang];
+    $("#addcar").textContent = ax[0]; $("#addcar").onclick = addCar;
     $("#settings").textContent = ax[1]; $("#settings").onclick = () => Setup.open({ mode: "settings", lang, onSaved: () => load() });
     $("#maptitle").textContent = T.map; $("#charttitle").textContent = T.chart; $("#listtitle").textContent = T.list; $("#cmptitle").textContent = UX[lang].cmp; $("#howto").textContent = UX[lang].howto;
-    const nav = $("#jumpnav"); nav.innerHTML = ""; ["visit", "decision", "costs", "listings", "explore", "compare"].forEach((id, i) => { const a = el("a", null, UX[lang].nav[i]); a.href = "#" + id; nav.append(a); });
+    // Jump links only for sections that currently have content.
+    const has = { visit: visitCars().length > 0, decision: cars.length > 0, listings: cars.length > 0, costs: cars.length > 0, explore: cars.length > 0, compare: costSelected.some(id => cars.some(c => c.id === id)) };
+    const nav = $("#jumpnav"); nav.innerHTML = ""; Object.keys(has).filter(id => has[id]).forEach(id => { const a = el("a", null, UX[lang].nav[id]); a.href = "#" + id; nav.append(a); }); nav.hidden = !nav.childElementCount;
     // Phone bar: filter toggle with the number of active filters, and map/chart tabs.
     const active = F.statuses.size + F.models.size + !!F.query + F.savedOnly + (fin().enabled && F.affordable) + (F.maxPrice < DEF.maxPrice) + (F.maxKm < DEF.maxKm) + (F.maxDrive !== DEF.maxDrive) + (F.includeUnverified !== DEF.includeUnverified) + F.carplay + F.cam + F.acc + !F.inCriteria + F.dealer + (!F.hideGone);
     const fb = $("#fbtn"); fb.textContent = filtersOpen ? T.fClose : T.fBtn(active); fb.setAttribute("aria-pressed", filtersOpen); fb.onclick = () => { filtersOpen = !filtersOpen; document.body.classList.toggle("filters-open", filtersOpen); renderHeader(); };
@@ -652,21 +692,22 @@ body.setup .wrap{display:none}
     const s1 = el("div"); s1.append(el("h3", null, T.fStatus));
     const cs = el("div", "chipset"); const counts = {}; cars.forEach(c => counts[c.status] = (counts[c.status] || 0) + 1);
     STATUS_ORDER.filter(s => counts[s]).forEach(s => { const b = el("button", "chip"); b.type = "button"; b.setAttribute("aria-pressed", F.statuses.has(s)); const d = el("i", "dot"); d.style.color = s === "candidate" ? "var(--muted)" : s === "contacted" ? "var(--info)" : ["replied", "call"].includes(s) ? "var(--warn)" : ["viewing", "bought"].includes(s) ? "var(--good)" : "var(--bad)"; b.append(d, document.createTextNode(T.status[s] + " · " + counts[s])); b.onclick = () => { if (F.statuses.has(s)) F.statuses.delete(s); else F.statuses.add(s); saveF(); render(); }; cs.append(b); });
-    s1.append(cs); a.append(s1);
+    s1.append(cs); if (cs.childElementCount) a.append(s1);
     // Model chips include every family currently tracked.
     const sm = el("div"); sm.append(el("h3", null, T.fModel)); const ms = el("div", "chipset");
     const mc = {}; cars.forEach(c => { const family = famOf(c); mc[family] = (mc[family] || 0) + 1; });
     const labels = {};
     Object.keys(mc).sort((a, b) => (labels[a] || a).localeCompare(labels[b] || b)).forEach(m => { const b = el("button", "chip", (labels[m] || m) + " · " + mc[m]); b.type = "button"; b.setAttribute("aria-pressed", F.models.has(m)); b.onclick = () => { if (F.models.has(m)) F.models.delete(m); else F.models.add(m); saveF(); render(); }; ms.append(b); });
-    sm.append(ms); a.append(sm);
+    sm.append(ms); if (ms.childElementCount) a.append(sm);
     const s2 = el("div"); s2.append(el("h3", null, T.fLimits));
     const rng = (key, label, min, max, step, fmt) => { const w = el("div", "range"); const l = el("label"); l.innerHTML = `<span>${label}</span><b>${fmt(F[key])}</b>`; const i = el("input"); i.type = "range"; i.min = min; i.max = max; i.step = step; i.value = F[key]; i.id = "f-" + key; i.oninput = () => { F[key] = +i.value; l.querySelector("b").textContent = fmt(F[key]); }; i.onchange = () => { saveF(); render(); }; w.append(l, i); return w; };
     s2.append(rng("maxPrice", T.maxPrice, 0, DEF.maxPrice, 250, eur), rng("maxKm", T.maxKm, 0, DEF.maxKm, 5000, km), rng("maxDrive", (P.distance.preferTransit ? T.maxDrive : T.maxDriveCar), 10, 600, 10, v => v + " " + T.min));
     s2.append(el("p", "muted", P.distance.preferTransit ? T.transitNote : T.driveNote));
     a.append(s2);
-    const s3 = el("div"); s3.append(el("h3", null, T.fMust)); const tg = el("div", "toggles");
-    [["includeUnverified", T.includeUnverified], ["carplay", T.needCarplay], ["cam", T.needCam], ["acc", T.needAcc], ["inCriteria", T.inCriteria], ["dealer", T.dealerOnly], ["hideGone", T.hideGone]].forEach(([k, l]) => { const lab = el("label"); const i = el("input"); i.type = "checkbox"; i.checked = !!F[k]; i.id = "t-" + k; i.onchange = () => { F[k] = i.checked; saveF(); render(); }; lab.append(i, document.createTextNode(l)); tg.append(lab); });
-    s3.append(tg); a.append(s3);
+    const toggles = (title, items) => { const box = el("div"); box.append(el("h3", null, title)); const tg = el("div", "toggles"); items.forEach(([k, l]) => { const lab = el("label"); const i = el("input"); i.type = "checkbox"; i.checked = !!F[k]; i.id = "t-" + k; i.onchange = () => { F[k] = i.checked; saveF(); render(); }; lab.append(i, document.createTextNode(l)); tg.append(lab); }); box.append(tg); a.append(box); };
+    toggles(T.fMust, [["carplay", T.needCarplay], ["cam", T.needCam], ["acc", T.needAcc]]);
+    // Display options, not equipment.
+    toggles(T.fShow, [["inCriteria", T.inCriteria], ["includeUnverified", T.includeUnverified], ["dealer", T.dealerOnly], ["hideGone", T.hideGone]]);
     const s4 = el("div"); s4.append(el("h3", null, T.fSort)); const sel = el("select"); sel.id = "sort"; Object.entries(T.sortOpts).forEach(([k, v]) => { const o = el("option", null, k === "drive" && !P.distance.preferTransit ? T.sortDriveCar : v); o.value = k; o.selected = k === F.sort; sel.append(o); }); sel.onchange = () => { F.sort = sel.value; saveF(); render(); }; s4.append(sel); a.append(s4);
     const r = el("button", "reset", T.reset); r.type = "button"; r.onclick = () => { F = { ...DEF, statuses: new Set(), models: new Set() }; saveF(); render(); }; a.append(r);
   }
@@ -674,10 +715,10 @@ body.setup .wrap{display:none}
   // ---------- KPIs ----------
   function renderKpis(list) {
     const k = $("#kpis"); k.innerHTML = "";
-    const tile = (v, l, s, onclick) => { const t = el("button", "kpi"); t.type = "button"; t.append(el("div", "v", v), el("div", "l", l)); if (s) t.append(el("div", "s", s)); if (onclick) t.onclick = onclick; k.append(t); };
-    tile(String(list.length), T.kpiMatch, cars.length + " " + T.cars);
+    const tile = (v, l, s, onclick) => { const t = el("button", "kpi"); t.type = "button"; t.append(el("div", "v", v), el("div", "l", l)); if (s) t.append(el("div", "s", s)); if (onclick) t.onclick = onclick; k.append(t); return t; };
+    tile(String(list.length), T.kpiMatch, cars.length + " " + (cars.length === 1 ? T.car : T.cars));
     const best = [...list].sort((a, b) => (b.score ?? -1) - (a.score ?? -1))[0];
-    if (best) tile(String(best.score ?? "–"), T.kpiBest, best.displayTitle || best.title, () => openCar(best.id));
+    if (best) estTitle(tile(scoreTxt(best), T.kpiBest, best.displayTitle || best.title, () => openCar(best.id)), best);
     const cheap = [...list].sort((a, b) => a.price - b.price)[0];
     if (cheap) tile(eur(cheap.price), T.kpiCheap, cheap.displayTitle || cheap.title, () => openCar(cheap.id));
     const near = [...list].filter(c => tripMin(c)).sort((a, b) => tripMin(a) - tripMin(b))[0];
@@ -685,18 +726,19 @@ body.setup .wrap{display:none}
     const ps = list.map(c => c.price).sort((a, b) => a - b); if (ps.length) tile(eur(ps[Math.floor(ps.length / 2)]), T.kpiMedian, "");
   }
 
+  const visitCars = () => cars.filter(c => c.visit && !c.gone && !["declined", "dropped"].includes(c.status)).sort((a, b) => a.visit.rank - b.visit.rank);
   // Hand-picked from seller replies: cars carry visit {rank, why{en,de,pt}, next{en,de,pt}}.
   function renderVisit() {
     const t = UX[lang], host = $("#visit"); host.innerHTML = "";
-    const pick = cars.filter(c => c.visit && !c.gone && !["declined", "dropped"].includes(c.status)).sort((a, b) => a.visit.rank - b.visit.rank);
+    const pick = visitCars();
     host.hidden = !pick.length; if (!pick.length) return;
     const head = el("div", "decision-head"); head.append(el("h2", null, t.visitTitle), el("p", null, t.visitHint)); host.append(head);
     const ol = el("ol", "visit-list");
     pick.forEach(c => {
       const li = el("li"); const b = el("button", "decision-item"); b.type = "button";
       const v = c.visit, pickLang = o => (o && (o[lang] || o.en)) || "";
-      b.append(el("strong", null, `${v.rank}. ${c.displayTitle || c.title}`), el("small", null, `${c.city || ""} · ${eur(c.price)} · ${km(c.km)} · ${c.driveMin ? c.driveMin + " " + T.min + " " + T.byCar : ""} · ${c.score ?? "–"} ${t.score}`));
-      b.append(el("span", null, pickLang(v.why)));
+      b.append(el("strong", null, `${v.rank}. ${c.displayTitle || c.title}`), el("small", null, `${c.city || ""} · ${eur(c.price)} · ${km(c.km)} · ${c.driveMin ? c.driveMin + " " + T.min + " " + T.byCar : ""} · ${scoreTxt(c)} ${t.score}`));
+      estTitle(b, c); b.append(el("span", null, pickLang(v.why)));
       if (v.next) b.append(el("small", "visit-next", `${t.visitNext}: ${pickLang(v.next)}`));
       b.onclick = () => openCar(c.id); li.append(b); ol.append(li);
     });
@@ -710,7 +752,7 @@ body.setup .wrap{display:none}
     if (!focus.length) { host.append(el("p", "empty", t.noFocus)); return; }
     const grid = el("div", "decision-grid"); focus.forEach(c => {
       const item = el("button", "decision-item"); item.type = "button"; item.setAttribute("aria-label", t.details + ": " + (c.displayTitle || c.title));
-      item.append(el("strong", null, c.displayTitle || c.title), el("small", null, `${c.city || ""} · ${km(c.km)} · ${c.score ?? "–"} ${t.score}`));
+      item.append(el("strong", null, c.displayTitle || c.title), estTitle(el("small", null, `${c.city || ""} · ${km(c.km)} · ${scoreTxt(c)} ${t.score}`), c));
       item.append(el("span", "money", fin().enabled ? `${eur(c.price)} · ${eur(Math.round(loanMonthly(c.price, costPrefs.apr)))} ${t.loan}` : eur(c.price)));
       const step = c.nextStep || (tf(c, "questions") || [])[0]; if (step) item.append(el("small", null, step));
       item.onclick = () => openCar(c.id); grid.append(item);
@@ -780,33 +822,34 @@ body.setup .wrap{display:none}
     if (kind === "drive") return v <= P.distance.maxDriveMin ? "good" : v <= P.distance.maxDriveMin * 1.5 ? "warn" : "bad";
     return "";
   }
-  function ring(score) {
-    const r = 24, C = 2 * Math.PI * r, s = score ?? 0; const w = el("div", "ring");
-    w.innerHTML = `<svg viewBox="0 0 56 56"><circle class="bg" cx="28" cy="28" r="${r}"/><circle class="fg" cx="28" cy="28" r="${r}" stroke="${scoreColor(score)}" stroke-dasharray="${C * s / 100} ${C}"/></svg><div class="n" style="color:${scoreColor(score)}">${score ?? "–"}</div>`;
-    return w;
+  function ring(c) {
+    const score = c.score, r = 24, C = 2 * Math.PI * r, s = score ?? 0; const w = el("div", "ring" + (c.scoreEstimated ? " est" : ""));
+    w.innerHTML = `<svg viewBox="0 0 56 56"><circle class="bg" cx="28" cy="28" r="${r}"/><circle class="fg" cx="28" cy="28" r="${r}" stroke="${scoreColor(score)}" stroke-dasharray="${C * s / 100} ${C}"/></svg><div class="n" style="color:${scoreColor(score)}">${esc(scoreTxt(c))}</div>`;
+    return estTitle(w, c);
   }
   function card(c) {
     const out = c.gone || ["declined", "dropped"].includes(c.status);
     const art = el("article", "card" + (out ? " is-out" : "") + (expanded.has(c.id) ? " open" : "")); art.id = "car-" + c.id;
     const row = el("div", "row"); row.setAttribute("role", "button"); row.tabIndex = 0; row.setAttribute("aria-expanded", expanded.has(c.id));
-    const tw = el("div", "thumbwrap"); const th = el("img", "thumb"); th.src = (c.photos || [])[0] || ""; th.alt = ""; th.loading = "lazy"; tw.append(th);
+    const tw = el("div", "thumbwrap"); tw.append(photo((c.photos || [])[0], "thumb", ""));
     if (isNew(c)) tw.append(el("span", "tag new badge-new", T.newBadge)); row.append(tw);
     const mid = el("div", "rowmain");
-    const h = el("h2", null, c.displayTitle || c.title); const sb = el("span", "seller " + (isDealer(c) ? "d" : "p"), tf(c, "sellerType")); h.append(sb);
+    const h = el("h2", null, c.displayTitle || c.title); const st = tf(c, "sellerType"); if (st) h.append(el("span", "seller " + (isDealer(c) ? "d" : "p"), st));
     if (c.gone) h.append(el("span", "tag gone", T.gone));
     if (c._crit.length) { const t = el("span", "tag out", UX[lang].outside); t.title = c._crit.map(critText).join(" · "); h.append(t); }
-    const l2 = el("div", "line2"); l2.innerHTML = `<b>${esc(engineTxt(c))}</b> · ${esc(tf(c, "dsgType") || c.gearbox || "")} · ${esc(c.city || c.location)} · <b>${esc(tripText(c))}</b>${tripMin(c) > P.distance.maxDriveMin * 1.5 ? " · " + esc(T.transitLong) : ""}`;
+    const l2 = el("div", "line2"); const eng = engineTxt(c);
+    l2.innerHTML = [eng && `<b>${esc(eng)}</b>`, esc(tf(c, "dsgType") || c.gearbox || ""), esc(c.city || c.location || ""), `<b>${esc(tripText(c))}</b>`, tripMin(c) > P.distance.maxDriveMin * 1.5 ? esc(T.transitLong) : ""].filter(Boolean).join(" · ");
     const facts = el("div", "facts");
     facts.append(el("span", "fact price " + factCls("price", c.price), eur(c.price) + (c.negotiable ? " " + T.neg : "")));
     if (fin().enabled) facts.append(el("span", "fact " + (loanMonthly(c.price, costPrefs.apr) <= loanCap() ? "good" : "bad"), eur(Math.round(loanMonthly(c.price, costPrefs.apr))) + " " + UX[lang].loan));
     facts.append(el("span", "fact " + factCls("km", c.km), km(c.km)));
     facts.append(el("span", "fact", (c.regMonth ? String(c.regMonth).padStart(2, "0") + "/" : "") + c.regYear));
-    facts.append(el("span", "fact", T.hu + " " + (tf(c, "hu") || "?")));
-    facts.append(el("span", "fact", T.owners(c.owners)));
+    if (tf(c, "hu")) facts.append(el("span", "fact", T.hu + " " + tf(c, "hu")));
+    if (c.owners != null && c.owners !== "") facts.append(el("span", "fact", T.owners(c.owners)));
     const kpy = kmPerYear(c); if (kpy) { const u = el("span", "fact", new Intl.NumberFormat(T.locale).format(Math.round(kpy / 1000) * 1000) + " " + T.kmYear); u.title = T.kmYearTip; facts.append(u); }
     const eq = el("div", "eq"); EQ_KEYS.forEach(k => { const v = (c.equip || {})[k] || 0; if (!v) return; const s = el("span", v >= 1 ? "on" : "maybe", T.eq[k] + (v < 1 ? " ?" : "")); if (v < 1) s.title = T.eqMaybe; eq.append(s); });
     mid.append(h, l2, facts, eq); row.append(mid);
-    const side = el("div", "rowside"); side.append(ring(c.score));
+    const side = el("div", "rowside"); side.append(ring(c));
     if (c.replyAssessment?.score != null) { const rr = el("span", "pill", `${UX[lang].reply}: ${c.replyAssessment.score}/10`); rr.title = UX[lang].replyHint; side.append(rr); }
     side.append(el("span", "pill s-" + c.status, T.status[c.status] || c.status));
     const pk = el("label", "pick" + (c.pick ? " on" : "")); const cb = el("input"); cb.type = "checkbox"; cb.checked = !!c.pick; cb.id = "pick-" + c.id; pk.append(cb, el("span", null, c.pick ? UX[lang].shortlisted : UX[lang].shortlist));
@@ -817,21 +860,29 @@ body.setup .wrap{display:none}
     art.append(row); if (expanded.has(c.id)) art.append(detail(c));
     return art;
   }
-  const engineTxt = c => c.engine ? c.engine.replace(/(\d+)\s*hp\b/i, (m, n) => n + " " + T.hp) : c.hp ? c.hp + " " + T.hp : "–";
+  const engineTxt = c => c.engine ? c.engine.replace(/(\d+)\s*hp\b/i, (m, n) => n + " " + T.hp) : c.hp ? c.hp + " " + T.hp : "";
+  // Listing photo, or a neutral placeholder when there is none or it fails to load.
+  const CAR_SVG = '<svg viewBox="0 0 64 40" aria-hidden="true"><path d="M6 28v-6l6-2 7-9h22l9 9 8 2v6" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/><path d="M4 28h56" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><circle cx="17" cy="29" r="5" fill="var(--surface-2)" stroke="currentColor" stroke-width="2.5"/><circle cx="47" cy="29" r="5" fill="var(--surface-2)" stroke="currentColor" stroke-width="2.5"/></svg>';
+  function placeholder(cls) { const d = el("div", cls + " ph"); d.innerHTML = CAR_SVG; return d; }
+  function photo(src, cls, alt) {
+    if (typeof src !== "string" || !src.trim()) return placeholder(cls);
+    const im = el("img", cls); im.src = src; im.alt = alt; im.loading = "lazy"; im.onerror = () => im.replaceWith(placeholder(cls)); return im;
+  }
   const isHttp = v => typeof v === "string" && /^https?:\/\//i.test(v);
   function specRow(dl, k, v) { if (v == null || v === "") return; const d = el("div"); d.append(el("dt", null, k), el("dd", null, String(v))); dl.append(d); }
   function detail(c) {
     const d = el("div", "detail");
     const head = el("div", "dhead");
     const ph = el("div", "photos"); const photos = c.photos || []; const idx = Math.min(openPhoto[c.id] || 0, Math.max(photos.length - 1, 0));
-    const main = el("img", "mainimg"); main.src = photos[idx] || ""; main.alt = c.title; ph.append(main);
+    if (!photos.length) ph.append(placeholder("mainimg"));
+    const main = el("img", "mainimg"); main.src = photos[idx] || ""; main.alt = c.title; if (photos.length) ph.append(main);
     if (photos.length > 1) { const th = el("div", "thumbs"); photos.forEach((p, i) => { const im = el("img", i === idx ? "on" : ""); im.src = p; im.alt = ""; im.onclick = () => { openPhoto[c.id] = i; main.src = p; th.querySelectorAll("img").forEach(x => x.classList.toggle("on", x === im)); }; th.append(im); }); ph.append(th); }
     head.append(ph);
     const f = el("div", "dfacts");
     const tr = el("div", "travel");
     const t1 = el("div"); t1.innerHTML = `<b>${esc(tripText(c))}</b>${tripMin(c) ? " · " + esc(T.transitApprox) : ""}`; tr.append(t1);
     const t2 = el("div"); t2.innerHTML = `<b>${esc(c.location || c.city || "")}</b>${esc(P.distance.preferTransit ? (c.transitCheckedAt ? T.transitNote : T.transitUnknown) : (driveMinutes(c) ? T.driveNote : T.tripUnknown))}`; tr.append(t2);
-    const t3 = el("div"); t3.innerHTML = `<b>${esc(tf(c, "sellerName"))}</b>${esc(tf(c, "sellerType"))}${c.phone ? ` · ${T.phone} <span class="phone">${esc(c.phone)}</span>` : ""}`; tr.append(t3);
+    if (tf(c, "sellerName") || tf(c, "sellerType") || c.phone) { const t3 = el("div"); t3.innerHTML = `<b>${esc(tf(c, "sellerName"))}</b>${esc(tf(c, "sellerType"))}${c.phone ? ` · ${T.phone} <span class="phone">${esc(c.phone)}</span>` : ""}`; tr.append(t3); }
     f.append(tr);
     const dl = el("dl", "specs");
     specRow(dl, T.specs.engine, engineTxt(c)); specRow(dl, T.specs.dsgType, tf(c, "dsgType"));
@@ -849,7 +900,7 @@ body.setup .wrap{display:none}
     const body = el("div", "dbody");
     const left = el("div", "col");
     if (c._crit.length) { const box = el("div", "crit"); box.append(el("strong", null, UX[lang].outside)); const ul = el("ul"); c._crit.forEach(r => { const li = el("li", null, critText(r)); if (r.key === "avoid" && r.def.reason[lang]) li.title = r.def.reason[lang]; ul.append(li); }); box.append(ul); left.append(box); }
-    left.append(el("h3", null, T.take), el("p", "verdict", tf(c, "verdict") || ""));
+    if (tf(c, "verdict") || (tf(c, "pros") || []).length || (tf(c, "cons") || []).length) left.append(el("h3", null, T.take), el("p", "verdict", tf(c, "verdict") || ""));
     const pc = el("div", "pc"); const plus = el("ul", "plus"); (tf(c, "pros") || []).forEach(p => plus.append(el("li", null, p))); const minus = el("ul", "minus"); (tf(c, "cons") || []).forEach(p => minus.append(el("li", null, p))); pc.append(plus, minus); left.append(pc);
     if (c.rating) { const bars = el("div", "bars"); RATING_KEYS.forEach(k => { if (c.rating[k] == null || (k === "distance" && !tripMin(c))) return; const v = Math.max(0, Math.min(10, c.rating[k])); bars.append(el("span", "bl", T.rating[k === "distance" && !P.distance.preferTransit ? "distanceCar" : k])); const bt = el("div", "bt"); const bf = el("div", "bf"); bf.style.width = v * 10 + "%"; bf.style.background = v >= 7 ? "var(--good)" : v >= 5 ? "var(--warn)" : "var(--bad)"; bt.append(bf); bars.append(bt, el("span", "bv", v + "/10")); }); if (!tripMin(c)) bars.append(el("span", "bl", T.rating[P.distance.preferTransit ? "distance" : "distanceCar"]), el("span", "bv", "?")); left.append(bars); }
     if (c.replyAssessment?.score != null) { const ra = c.replyAssessment; const box = el("div", "reply-assessment"); box.append(el("h3", null, `${UX[lang].reply}: ${ra.score}/10`), el("p", "verdict", ra.summary?.[lang] || ra.summary?.en || ""), el("small", null, UX[lang].replyHint)); left.append(box); }
@@ -891,14 +942,19 @@ body.setup .wrap{display:none}
     T.cols.forEach((h, i) => { if (i === 8 && !P.distance.preferTransit) h = T.colDriveCar; const th = el("th", (numCols.includes(i) ? "num" : "") + (tableSort.k === keys[i] ? " sorted" : ""), h + (tableSort.k === keys[i] ? (tableSort.dir > 0 ? " ↑" : " ↓") : "")); th.onclick = () => { if (tableSort.k === keys[i]) tableSort.dir *= -1; else tableSort = { k: keys[i], dir: keys[i] === "score" ? -1 : 1 }; renderTable(visible()); }; hr.append(th); });
     thead.append(hr); t.append(thead); const tb = el("tbody");
     rows.forEach(c => { const tr = el("tr"); const td0 = el("td"); const a = el("a", null, c.displayTitle || c.title); a.href = "#car-" + c.id; a.onclick = e => { e.preventDefault(); openCar(c.id); }; td0.append(a); if (c.pick) td0.append(document.createTextNode(" ✓")); tr.append(td0);
-      const ts = el("td", "num"); ts.append(el("span", "sc", String(c.score ?? "–"))); ts.firstChild.style.color = scoreColor(c.score); tr.append(ts);
+      const ts = el("td", "num"); ts.append(estTitle(el("span", "sc", scoreTxt(c)), c)); ts.firstChild.style.color = scoreColor(c.score); tr.append(ts);
       const ky = kmPerYear(c);
       tr.append(el("td", "num " + factCls("price", c.price), eur(c.price)), el("td", "num " + factCls("km", c.km), new Intl.NumberFormat(T.locale).format(c.km)), el("td", "num", ky ? new Intl.NumberFormat(T.locale).format(Math.round(ky / 1000) * 1000) : "–"), el("td", "num", String(c.regYear)), el("td", "num", c.hp ? String(c.hp) : "–"), el("td", null, gearboxLabel(c)), el("td", "num", tripMin(c) ? "~" + tripMin(c) + " " + T.min : "?"), el("td", null, tf(c, "sellerType")), el("td", null, tf(c, "timingBelt") || "?"), el("td", null, (c.equip || {}).carplay ? "✓" : "–"), el("td", null, (c.equip || {}).camera ? "✓" : "–"));
       const tds = el("td"); tds.append(el("span", "pill s-" + c.status, T.status[c.status] || c.status)); tr.append(tds); tb.append(tr); });
     t.append(tb);
   }
 
-  function render() { T = I18N[lang]; const list = visible(); renderHeader(); renderFilters(); renderKpis(list); renderVisit(); renderDecision(list); renderMap(list); renderChart(list); renderUpdates(); renderCosts(list); renderList(list); renderTable(list); }
+  function render() {
+    T = I18N[lang]; const list = visible(); renderHeader(); renderFilters(); renderWelcome();
+    if (!cars.length) return;
+    renderKpis(list); renderVisit(); renderDecision(list); renderMap(list); renderChart(list); renderUpdates(); renderCosts(list); renderList(list); renderTable(list);
+    $("#compare").hidden = !costSelected.some(id => cars.some(c => c.id === id));
+  }
   document.querySelectorAll(".lang button").forEach(b => b.onclick = () => { lang = b.dataset.lang; try { localStorage.setItem("carhunt-lang", lang); } catch (e) {} if (P) render(); });
 
   // ---------- saving ----------
@@ -913,6 +969,8 @@ body.setup .wrap{display:none}
   const toList = obj => Object.entries(obj || {}).map(([id, d]) => {
     const c = { id, ...d };
     const s = Criteria.scoreCar(c, P.weights); if (s != null) c.score = s;
+    // Cars without a routine assessment (e.g. added by hand) get a partial estimate from the listing data.
+    if (!c.rating && c.score == null) { const e = Criteria.scoreCar({ rating: Criteria.estimateRating(c, P) }, P.weights); if (e != null) { c.score = e; c.scoreEstimated = true; } }
     c._crit = Criteria.checkCriteria(c, P, CAT);
     return c;
   });
