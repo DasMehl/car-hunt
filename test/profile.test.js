@@ -51,3 +51,9 @@ test("setup.js default profile matches lib/profile.js", () => {
   const browserDefault = new Function(body + "; return defaultProfile();")();
   assert.deepEqual(browserDefault, defaultProfile());
 });
+
+test("inherited property names are not accepted as fields", () => {
+  const p = defaultProfile();
+  p.constructor = 1;
+  assert.match(validateProfile(p).errors.join("\n"), /constructor: unknown field/);
+});

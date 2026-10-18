@@ -8,7 +8,9 @@ const { validateProfile } = require("./lib/profile");
 const { geocode, drive } = require("./lib/geo");
 
 const STATUSES = ["candidate", "contacted", "replied", "call", "viewing", "declined", "dropped", "bought"];
-const LISTING_FIELDS = ["title", "shortName", "displayTitle", "make", "model", "fuel", "engine", "facelift", "variant", "trim", "colour", "price", "negotiable", "km", "regMonth", "regYear", "hp", "gearbox", "dsgType", "hu", "owners", "serviceHistory", "timingBelt", "dsgOil", "docsReview", "carplay", "carplayStatus", "camera", "location", "city", "distanceKm", "airKm", "roadKm", "driveMin", "transitMin", "transitCheckedAt", "transitSource", "transitDestination", "transitApproximate", "lat", "lon", "bahnUrl", "mapsUrl", "sellerName", "sellerType", "phone", "url", "kleinanzeigenUrl", "photos", "verdict", "pros", "cons", "questions", "i18n", "equip", "score", "rating", "replyAssessment", "visit", "order", "addedAt", "lastSeenAt", "priceHistory", "gone"];
+const LISTING_FIELDS = ["title", "shortName", "displayTitle", "make", "model", "fuel", "engine", "facelift", "variant", "trim", "colour", "price", "negotiable", "km", "regMonth", "regYear", "hp", "gearbox", "dsgType", "hu", "owners", "serviceHistory", "timingBelt", "dsgOil", "docsReview", "carplay", "carplayStatus", "camera", "location", "city", "distanceKm", "airKm", "roadKm", "driveMin", "transitMin", "transitCheckedAt", "transitSource", "transitDestination", "transitApproximate", "lat", "lon", "bahnUrl", "mapsUrl", "sellerName", "sellerType", "phone", "url", "kleinanzeigenUrl", "photos", "verdict", "pros", "cons", "questions", "i18n", "equip", "score", "rating", "replyAssessment", "visit", "order", "addedAt", "lastSeenAt", "priceHistory", "gone", "source"];
+const LINK_FIELDS = ["url", "mapsUrl", "bahnUrl", "kleinanzeigenUrl"];
+const isHttpUrl = v => typeof v === "string" && /^https?:\/\//i.test(v);
 const today = () => new Date().toISOString().slice(0, 10);
 
 function createApp(options = {}) {
@@ -58,7 +60,9 @@ function createApp(options = {}) {
       const pass = scheme === "Basic" && b64 ? Buffer.from(b64, "base64").toString().split(":").slice(1).join(":") : "";
       const a = Buffer.from(pass), b = Buffer.from(password);
       if (a.length === b.length && crypto.timingSafeEqual(a, b)) return next();
-      res.set("WWW-Authenticate", `Basic realm="${(state.profile && state.profile.name || "Car Hunt").replace(/"/g, "")}"`);
+      // Header values must be Latin-1; keep printable ASCII only so any profile name is safe.
+      const realm = String(state.profile && state.profile.name || "").replace(/[^\x20-\x7e]/g, "").replace(/"/g, "").trim() || "Car Hunt";
+      res.set("WWW-Authenticate", `Basic realm="${realm}"`);
       res.status(401).send("Password required");
     });
   }
@@ -106,8 +110,8 @@ function createApp(options = {}) {
     const d = today();
     const car = {
       title: b.title.trim(), displayTitle: `${b.title.trim()} · ${b.regYear}`, model: b.title.trim(), fuel: b.fuel,
-      gearbox: b.gearbox === "automatic" ? "Automatic" : "Manual", price: b.price, km: b.km, regYear: b.regYear, regMonth: b.regMonth || 1,
-      hp: b.hp || null, location: b.town.trim(), city: b.town.trim(), url: b.url, photos: [],
+      gearbox: b.gearbox === "automatic" ? "Automatic" : "Manual", price: b.price, km: b.km, regYear: b.regYear, regMonth: b.regMonth ?? null,
+      hp: b.hp ?? null, location: b.town.trim(), city: b.town.trim(), url: b.url, photos: [], source: "manual",
       status: "candidate", pick: false, notes: b.notes || "", nextStep: "", messages: [], addedAt: d, lastSeenAt: d, priceHistory: [{ date: d, price: b.price }]
     };
     try {
@@ -166,7 +170,7 @@ function createApp(options = {}) {
   app.put("/api/cars/:id", requireKey, async (req, res) => {
     const id = req.params.id, incoming = req.body || {};
     if (!/^[a-z0-9][a-z0-9-]{0,79}$/.test(id)) return res.status(400).json({ error: "invalid id" });
-    const listing = Object.fromEntries(Object.entries(incoming).filter(([k]) => LISTING_FIELDS.includes(k)));
+    const listing = Object.fromEntries(Object.entries(incoming).filter(([k, v]) => LISTING_FIELDS.includes(k) && (!LINK_FIELDS.includes(k) || isHttpUrl(v))));
     const prev = state.cars[id];
     state.cars[id] = prev ? { ...prev, ...listing } : { status: "candidate", pick: false, notes: "", nextStep: "", messages: [], addedAt: today(), ...listing };
     if (!prev && typeof incoming.pick === "boolean") state.cars[id].pick = incoming.pick;
@@ -176,7 +180,12 @@ function createApp(options = {}) {
   });
 
   app.put("/api/meta", requireKey, async (req, res) => {
-    Object.assign(state.meta, req.body || {});
+    const b = req.body;
+    if (!b || typeof b !== "object" || Array.isArray(b) || Object.keys(b).some(k => k !== "lastCheck")) return res.status(400).json({ error: "unsupported field" });
+    if ("lastCheck" in b) {
+      if (b.lastCheck !== null && (typeof b.lastCheck !== "string" || b.lastCheck.length > 40)) return res.status(400).json({ error: "invalid lastCheck" });
+      state.meta.lastCheck = b.lastCheck;
+    }
     try { await persist(); } catch (e) { return res.status(500).json({ error: "save failed" }); }
     res.json({ ok: true, meta: state.meta });
   });
@@ -190,7 +199,7 @@ function createApp(options = {}) {
         if (c.gone) { c.gone = false; changes.push({ date: d, type: "back", id, text: c.displayTitle }); }
         if (s.price && s.price !== c.price) { c.priceHistory = [...(c.priceHistory || []), { date: d, price: s.price }]; changes.push({ date: d, type: "price", id, text: c.displayTitle, from: c.price, to: s.price }); c.price = s.price; }
         if (s.km && s.km !== c.km) c.km = s.km;
-      } else if (req.body.complete && !c.gone && !["bought", "declined", "dropped"].includes(c.status)) {
+      } else if (req.body.complete && c.source !== "manual" && !c.gone && !["bought", "declined", "dropped"].includes(c.status)) {
         c.gone = true; c.goneAt = d; changes.push({ date: d, type: "gone", id, text: c.displayTitle });
       }
     }
@@ -208,6 +217,15 @@ function createApp(options = {}) {
 module.exports = { createApp, LISTING_FIELDS, STATUSES };
 
 if (require.main === module) {
+  if (!process.env.SITE_PASSWORD) {
+    if (process.env.ALLOW_OPEN !== "1") {
+      console.error("SITE_PASSWORD is not set. Set it, or set ALLOW_OPEN=1 to run without a password (local use only).");
+      process.exit(1);
+    }
+    console.warn("Warning: ALLOW_OPEN=1 and no SITE_PASSWORD: anyone who can reach this server can see and edit the hunt.");
+  }
   const port = process.env.PORT || 3000;
-  createApp().listen(port, () => console.log(`Car Hunt on :${port}`));
+  const app = createApp();
+  const profile = app.locals.state.profile;
+  app.listen(port, () => console.log(`Car Hunt on :${port}${profile ? ` (${profile.name})` : ""}`));
 }

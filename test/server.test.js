@@ -69,7 +69,7 @@ test("a failing save answers 500 and the server keeps running", async () => {
     const put = await fetch(s.base + "/api/cars/demo", { method: "PUT", headers: s.sync, body: JSON.stringify({ title: "Demo" }) });
     assert.equal(put.status, 500);
     assert.deepEqual(await put.json(), { error: "save failed" });
-    const meta = await fetch(s.base + "/api/meta", { method: "PUT", headers: s.sync, body: JSON.stringify({ x: 1 }) });
+    const meta = await fetch(s.base + "/api/meta", { method: "PUT", headers: s.sync, body: JSON.stringify({ lastCheck: "2026-10-18" }) });
     assert.equal(meta.status, 500);
     const sync = await fetch(s.base + "/api/sync", { method: "POST", headers: s.sync, body: JSON.stringify({ seen: {}, complete: false }) });
     assert.equal(sync.status, 500);
@@ -180,4 +180,84 @@ test("a failed manual-add save answers 500 and leaves no car or log entry behind
     const meta = await (await fetch(s.base + "/api/meta", { headers: s.auth })).json();
     assert.equal(meta.log.length, 0);
   } finally { await s.close(); }
+});
+
+test("a profile name outside Latin-1 still gives a 401 with a password prompt", async () => {
+  const s = await start();
+  try {
+    const p = defaultProfile(); p.name = "Škoda hunt 🚗";
+    assert.equal((await fetch(s.base + "/api/profile", { method: "PUT", headers: json(s.auth), body: JSON.stringify(p) })).status, 200);
+    const r = await fetch(s.base + "/");
+    assert.equal(r.status, 401);
+    assert.equal(r.headers.get("www-authenticate"), 'Basic realm="koda hunt"');
+  } finally { await s.close(); }
+});
+
+test("sync with complete: true never marks a manually added car gone", async () => {
+  const s = await start({ fetchImpl: failFetch });
+  try {
+    const { id, car } = await (await fetch(s.base + "/api/cars", { method: "POST", headers: json(s.auth), body: JSON.stringify(newCar) })).json();
+    assert.equal(car.source, "manual");
+    await fetch(s.base + "/api/cars/routine-car", { method: "PUT", headers: s.sync, body: JSON.stringify({ title: "Routine car", price: 9000 }) });
+    const r = await fetch(s.base + "/api/sync", { method: "POST", headers: s.sync, body: JSON.stringify({ seen: {}, complete: true }) });
+    assert.equal(r.status, 200);
+    const cars = (await (await fetch(s.base + "/api/cars", { headers: s.auth })).json()).cars;
+    assert.notEqual(cars[id].gone, true);
+    assert.equal(cars["routine-car"].gone, true);
+  } finally { await s.close(); }
+});
+
+test("PUT /api/meta accepts only lastCheck", async () => {
+  const s = await start();
+  try {
+    const bad = await fetch(s.base + "/api/meta", { method: "PUT", headers: s.sync, body: JSON.stringify({ log: "x" }) });
+    assert.equal(bad.status, 400);
+    assert.deepEqual(await bad.json(), { error: "unsupported field" });
+    assert.equal((await fetch(s.base + "/api/meta", { method: "PUT", headers: s.sync, body: JSON.stringify({ lastCheck: 5 }) })).status, 400);
+    assert.equal((await fetch(s.base + "/api/meta", { method: "PUT", headers: s.sync, body: JSON.stringify({ lastCheck: "x".repeat(41) }) })).status, 400);
+    const ok = await fetch(s.base + "/api/meta", { method: "PUT", headers: s.sync, body: JSON.stringify({ lastCheck: "2026-10-18T10:00:00Z" }) });
+    assert.equal(ok.status, 200);
+    assert.equal((await ok.json()).meta.lastCheck, "2026-10-18T10:00:00Z");
+    assert.equal((await fetch(s.base + "/api/meta", { method: "PUT", headers: s.sync, body: JSON.stringify({ lastCheck: null }) })).status, 200);
+    const meta = await (await fetch(s.base + "/api/meta", { headers: s.auth })).json();
+    assert.ok(Array.isArray(meta.log));
+  } finally { await s.close(); }
+});
+
+test("manual add without regMonth or hp stores null", async () => {
+  const s = await start({ fetchImpl: failFetch });
+  try {
+    const { car } = await (await fetch(s.base + "/api/cars", { method: "POST", headers: json(s.auth), body: JSON.stringify(newCar) })).json();
+    assert.equal(car.regMonth, null);
+    assert.equal(car.hp, null);
+  } finally { await s.close(); }
+});
+
+test("PUT /api/cars drops link fields that are not http(s)", async () => {
+  const s = await start();
+  try {
+    const body = { title: "Links", url: "javascript:alert(1)", mapsUrl: "https://maps.example/x", bahnUrl: "data:text/html,x", kleinanzeigenUrl: 42 };
+    assert.equal((await fetch(s.base + "/api/cars/links", { method: "PUT", headers: s.sync, body: JSON.stringify(body) })).status, 200);
+    const c = (await (await fetch(s.base + "/api/cars", { headers: s.auth })).json()).cars.links;
+    assert.equal(c.url, undefined);
+    assert.equal(c.mapsUrl, "https://maps.example/x");
+    assert.equal(c.bahnUrl, undefined);
+    assert.equal(c.kleinanzeigenUrl, undefined);
+    await fetch(s.base + "/api/cars/links", { method: "PUT", headers: s.sync, body: JSON.stringify({ url: "http://a.example/1" }) });
+    await fetch(s.base + "/api/cars/links", { method: "PUT", headers: s.sync, body: JSON.stringify({ url: "javascript:x" }) });
+    assert.equal((await (await fetch(s.base + "/api/cars", { headers: s.auth })).json()).cars.links.url, "http://a.example/1");
+  } finally { await s.close(); }
+});
+
+const { spawnSync } = require("node:child_process");
+const runServer = env => spawnSync(process.execPath, [path.join(__dirname, "..", "server.js")], { env: { PATH: process.env.PATH, PORT: "0", DATA_DIR: fs.mkdtempSync(path.join(require("node:os").tmpdir(), "car-hunt-start-")), ...env }, timeout: 1500, encoding: "utf8" });
+
+test("the server refuses to start without SITE_PASSWORD unless ALLOW_OPEN=1", () => {
+  const refused = runServer({});
+  assert.equal(refused.status, 1);
+  assert.match(refused.stderr, /SITE_PASSWORD/);
+  const open = runServer({ ALLOW_OPEN: "1" });
+  assert.equal(open.status, null); // still running when the timeout kills it
+  assert.match(open.stderr, /ALLOW_OPEN/);
+  assert.match(open.stdout, /Car Hunt on/);
 });
