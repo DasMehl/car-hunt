@@ -227,7 +227,6 @@ details.q ol { margin: 6px 0 0; padding-left: 18px; font-size: 13.5px; color: va
 .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; } @media (max-width: 500px) { .row2 { grid-template-columns: 1fr; } }
 .addreply { display: none; } .addreply.open { display: grid; gap: 8px; }
 .saved { font-size: 12px; color: var(--good); min-height: 16px; }
-.readonly .controls, .readonly .pick { display: none; }
 .pricehist { font-size: 12.5px; color: var(--muted); }
 
 .compare { margin-top: 8px; }
@@ -242,7 +241,6 @@ tr:last-child td { border-bottom: 0; }
 .sc { font-weight: 600; font-family: var(--display); }
 .howto { margin-top: 20px; font-size: 13px; color: var(--muted); max-width: 72ch; }
 .card { scroll-margin-top: 64px; }
-.snapnote { background: var(--warn-bg); color: var(--warn); padding: 8px 12px; border-radius: 8px; font-size: 13px; }
 .kpi { min-width: 0; }
 
 /* Phone layout (iPhone 13: 390px, 16 Pro Max: 430px): filters collapse behind a button, map and chart become tabs, rows stack. */
@@ -317,7 +315,6 @@ body.setup .wrap{display:none}
     </div>
   </header>
 
-  <div id="snapnote" class="snapnote" hidden></div>
 
   <div class="mbar" id="mbar">
     <button type="button" id="fbtn" class="chip"></button>
@@ -367,12 +364,12 @@ body.setup .wrap{display:none}
       map: "Where they are", chart: "Price vs mileage, coloured by score", budgetLine: "budget", stretchLine: "stretch",
       scoreHigh: "≥ 70 good", scoreMid: "55–69 fair", scoreLow: "< 55 weak", home: "Home",
       list: "Ranked list", car: "car", cars: "cars", loading: "Loading…", noMatch: "No car matches these filters.", loadFail: "Could not load the cars.",
-      snapshot: "Read-only view: showing the snapshot from", updates: "Latest changes", upNew: "new", upPrice: "price", upGone: "gone", upBack: "back",
+      updates: "Latest changes", upNew: "new", upPrice: "price", upGone: "gone", upBack: "back",
       drive: "drive", byCar: "by car", roadKm: "road", train: "Train connection", route: "Route", listing: "Listing", copy: "Copy number", copied: "Copied", phone: "Phone",
       hp: "hp", neg: "neg.", owners: o => o == null ? "owners ?" : o + (o === 1 ? " owner" : " owners"), hu: "HU", gone: "Listing gone", newBadge: "NEW",
       eq: { carplay: "CarPlay", camera: "Camera", acc: "ACC", ahk: "Tow hitch", led: "LED/Xenon", pano: "Panorama", navi: "Navi", seatheat: "Heated seats", leather: "Leather", massage: "Massage", wireless: "Wireless charging", keyless: "Keyless", lane: "Lane assist", parkassist: "Park assist", standheizung: "Parking heater", digital: "Digital cockpit", blindspot: "Blind spot" },
-      specs: { engine: "Engine", dsgType: "Gearbox", hu: "Inspection (HU)", owners: "Owners", serviceHistory: "Service history", timingBelt: "Timing belt", dsgOil: "DSG oil", carplay: "CarPlay", camera: "Rear camera", colour: "Colour", facelift: "Generation" },
-      facelift: ["Golf 7 pre-facelift", "Golf 7 facelift"], take: "Assessment", docsReview: "From the listing photos", questions: "Questions to clarify", conv: "Conversation", noMsgs: "No messages yet.",
+      specs: { engine: "Engine", dsgType: "Gearbox", hu: "Inspection (HU)", owners: "Owners", serviceHistory: "Service history", timingBelt: "Timing belt", dsgOil: "Gearbox oil", carplay: "CarPlay", camera: "Rear camera", colour: "Colour" },
+      take: "Assessment", docsReview: "From the listing photos", questions: "Questions to clarify", conv: "Conversation", noMsgs: "No messages yet.",
       rating: { km: "Mileage & age", docs: "Maintenance records", gearbox: "Gearbox risk", seller: "Seller & warranty", price: "Price", distance: "Visit by transit", distanceCar: "Distance by car", equip: "Equipment" },
       statusL: "Status", next: "Next step", nextPh: "e.g. call after 13:00", notes: "My notes", notesPh: "Impressions, offers, things to check at the viewing…",
       logReply: "Log a reply", cancel: "Cancel", fromL: "From", via: "Via", vias: ["Phone", "mobile.de", "Email", "WhatsApp", "In person"], said: "What they said", add: "Add to conversation",
@@ -392,12 +389,12 @@ body.setup .wrap{display:none}
       map: "Wo sie stehen", chart: "Preis vs. Kilometer, Farbe = Punkte", budgetLine: "Budget", stretchLine: "Schmerzgrenze",
       scoreHigh: "≥ 70 gut", scoreMid: "55–69 okay", scoreLow: "< 55 schwach", home: "Zuhause",
       list: "Rangliste", car: "Auto", cars: "Autos", loading: "Lädt…", noMatch: "Kein Auto passt zu diesen Filtern.", loadFail: "Autos konnten nicht geladen werden.",
-      snapshot: "Nur-Lese-Ansicht: Stand vom", updates: "Letzte Änderungen", upNew: "neu", upPrice: "Preis", upGone: "weg", upBack: "wieder da",
+      updates: "Letzte Änderungen", upNew: "neu", upPrice: "Preis", upGone: "weg", upBack: "wieder da",
       drive: "Fahrt", byCar: "mit dem Auto", roadKm: "Straße", train: "Bahnverbindung", route: "Route", listing: "Inserat", copy: "Nummer kopieren", copied: "Kopiert", phone: "Telefon",
       hp: "PS", neg: "VB", owners: o => o == null ? "Halter ?" : o + " Halter", hu: "HU", gone: "Inserat weg", newBadge: "NEU",
       eq: { carplay: "CarPlay", camera: "Kamera", acc: "ACC", ahk: "AHK", led: "LED/Xenon", pano: "Panorama", navi: "Navi", seatheat: "Sitzheizung", leather: "Leder", massage: "Massage", wireless: "Kabellos laden", keyless: "Keyless", lane: "Spurassistent", parkassist: "Parkassistent", standheizung: "Standheizung", digital: "Digital Cockpit", blindspot: "Totwinkel" },
-      specs: { engine: "Motor", dsgType: "Getriebe", hu: "HU/TÜV", owners: "Halter", serviceHistory: "Scheckheft", timingBelt: "Zahnriemen", dsgOil: "DSG-Öl", carplay: "CarPlay", camera: "Rückfahrkamera", colour: "Farbe", facelift: "Generation" },
-      facelift: ["Golf 7 vor Facelift", "Golf 7 Facelift"], take: "Einschätzung", docsReview: "Aus den Inseratsfotos", questions: "Zu klärende Fragen", conv: "Verlauf", noMsgs: "Noch keine Nachrichten.",
+      specs: { engine: "Motor", dsgType: "Getriebe", hu: "HU/TÜV", owners: "Halter", serviceHistory: "Scheckheft", timingBelt: "Zahnriemen", dsgOil: "Getriebeöl", carplay: "CarPlay", camera: "Rückfahrkamera", colour: "Farbe" },
+      take: "Einschätzung", docsReview: "Aus den Inseratsfotos", questions: "Zu klärende Fragen", conv: "Verlauf", noMsgs: "Noch keine Nachrichten.",
       rating: { km: "Laufleistung & Alter", docs: "Wartungsnachweise", gearbox: "Getrieberisiko", seller: "Verkäufer & Gewährleistung", price: "Preis", distance: "Besuch mit ÖPNV", distanceCar: "Entfernung mit dem Auto", equip: "Ausstattung" },
       statusL: "Status", next: "Nächster Schritt", nextPh: "z. B. ab 13 Uhr anrufen", notes: "Meine Notizen", notesPh: "Eindrücke, Angebote, was bei der Besichtigung zu prüfen ist…",
       logReply: "Antwort eintragen", cancel: "Abbrechen", fromL: "Von", via: "Über", vias: ["Telefon", "mobile.de", "E-Mail", "WhatsApp", "Persönlich"], said: "Was gesagt wurde", add: "Zum Verlauf hinzufügen",
@@ -417,12 +414,12 @@ body.setup .wrap{display:none}
       map: "Onde estão", chart: "Preço vs. km, cor = pontuação", budgetLine: "orçamento", stretchLine: "limite",
       scoreHigh: "≥ 70 bom", scoreMid: "55–69 razoável", scoreLow: "< 55 fraco", home: "Casa",
       list: "Ranking", car: "carro", cars: "carros", loading: "Carregando…", noMatch: "Nenhum carro corresponde a esses filtros.", loadFail: "Não foi possível carregar os carros.",
-      snapshot: "Somente leitura: versão de", updates: "Últimas mudanças", upNew: "novo", upPrice: "preço", upGone: "saiu", upBack: "voltou",
+      updates: "Últimas mudanças", upNew: "novo", upPrice: "preço", upGone: "saiu", upBack: "voltou",
       drive: "viagem", byCar: "de carro", roadKm: "estrada", train: "Conexão de trem", route: "Rota", listing: "Anúncio", copy: "Copiar número", copied: "Copiado", phone: "Telefone",
       hp: "cv", neg: "negociável", owners: o => o == null ? "donos ?" : o + (o === 1 ? " dono" : " donos"), hu: "Inspeção", gone: "Anúncio saiu", newBadge: "NOVO",
       eq: { carplay: "CarPlay", camera: "Câmera", acc: "ACC", ahk: "Engate", led: "LED/Xenon", pano: "Teto pan.", navi: "GPS", seatheat: "Bancos aquec.", leather: "Couro", massage: "Massagem", wireless: "Carregador s/ fio", keyless: "Keyless", lane: "Assist. faixa", parkassist: "Assist. estac.", standheizung: "Aquecedor", digital: "Painel digital", blindspot: "Ponto cego" },
-      specs: { engine: "Motor", dsgType: "Câmbio", hu: "Inspeção (HU)", owners: "Donos", serviceHistory: "Histórico de revisões", timingBelt: "Correia dentada", dsgOil: "Óleo do DSG", carplay: "CarPlay", camera: "Câmera de ré", colour: "Cor", facelift: "Geração" },
-      facelift: ["Golf 7 pré-facelift", "Golf 7 facelift"], take: "Avaliação", docsReview: "Das fotos do anúncio", questions: "Perguntas a esclarecer", conv: "Conversa", noMsgs: "Nenhuma mensagem ainda.",
+      specs: { engine: "Motor", dsgType: "Câmbio", hu: "Inspeção (HU)", owners: "Donos", serviceHistory: "Histórico de revisões", timingBelt: "Correia dentada", dsgOil: "Óleo do câmbio", carplay: "CarPlay", camera: "Câmera de ré", colour: "Cor" },
+      take: "Avaliação", docsReview: "Das fotos do anúncio", questions: "Perguntas a esclarecer", conv: "Conversa", noMsgs: "Nenhuma mensagem ainda.",
       rating: { km: "Quilometragem e idade", docs: "Histórico de manutenção", gearbox: "Risco do câmbio", seller: "Vendedor e garantia", price: "Preço", distance: "Visita de transporte público", distanceCar: "Distância de carro", equip: "Equipamentos" },
       statusL: "Status", next: "Próximo passo", nextPh: "ex.: ligar depois das 13h", notes: "Minhas anotações", notesPh: "Impressões, ofertas, o que verificar na visita…",
       logReply: "Registrar resposta", cancel: "Cancelar", fromL: "De", via: "Por", vias: ["Telefone", "mobile.de", "E-mail", "WhatsApp", "Pessoalmente"], said: "O que disseram", add: "Adicionar à conversa",
@@ -471,7 +468,7 @@ body.setup .wrap{display:none}
   const scoreColor = s => s == null ? "var(--muted)" : s >= 70 ? "var(--good)" : s >= 55 ? "var(--warn)" : "var(--bad)";
   const scoreHex = s => s == null ? "#8a97a8" : s >= 70 ? "#1d7a4b" : s >= 55 ? "#c07d13" : "#b4393b";
 
-  let cars = [], meta = { lastCheck: null, log: [] }, api = false, canWrite = true, readOnly = false;
+  let cars = [], meta = { lastCheck: null, log: [] }, api = false, canWrite = true;
   const expanded = new Set(); if (location.hash.startsWith("#car-")) expanded.add(location.hash.slice(5));
   const openPhoto = {}, openReply = {};
   let DEF = {};
@@ -500,7 +497,12 @@ body.setup .wrap{display:none}
   let filtersOpen = false, panelTab = "map";
 
   // ---------- filtering & sorting ----------
-  function gearboxLabel(c) { const x = c.dsgType || c.gearbox || ""; if (/DQ250/i.test(x)) return "DQ250 · 6"; if (/DQ381/i.test(x)) return "DQ381 · 7"; if (/DCT|dual-clutch/i.test(x)) return "DCT · 7"; if (/DSG/i.test(x)) return "DSG · verify"; if (/automatik|automatic/i.test(x)) return "Automatic"; return "Verify"; }
+  function gearboxLabel(c) {
+    const own = String(c.dsgType || c.gearbox || "").split(/ — |\(/)[0].trim();
+    if (own) return own;
+    const g = Criteria.gearboxOf(c);
+    return g === "manual" ? "Manual" : g === "automatic" ? "Automatic" : "?";
+  }
   // Average yearly mileage since first registration (today's date as the end point).
   function kmPerYear(c) { if (!c.km || !c.regYear) return null; const years = (Date.now() - new Date(c.regYear, (c.regMonth || 1) - 1, 1).getTime()) / 31557600000; return years > 0.5 ? c.km / years : null; }
   function isDealer(c) { return /dealer|händler|concession/i.test(c.sellerType || ""); }
@@ -527,7 +529,7 @@ body.setup .wrap{display:none}
     else if (k === "score") c.sort((a, b) => (b.score ?? -1) - (a.score ?? -1));
     else if (k === "price") c.sort((a, b) => a.price - b.price);
     else if (k === "km") c.sort((a, b) => a.km - b.km);
-    else if (k === "year") c.sort((a, b) => (b.regYear * 100 + b.regMonth) - (a.regYear * 100 + a.regMonth));
+    else if (k === "year") c.sort((a, b) => (b.regYear * 100 + (b.regMonth || 1)) - (a.regYear * 100 + (a.regMonth || 1)));
     else if (k === "drive") c.sort((a, b) => (tripMin(a) ?? 999) - (tripMin(b) ?? 999));
     else if (k === "value") c.sort((a, b) => ((b.score ?? 0) / b.price) - ((a.score ?? 0) / a.price));
     else c.sort(rec);
@@ -718,7 +720,7 @@ body.setup .wrap{display:none}
     for (let v = x0; v <= x1; v += 20000) s += `<line class="grid" x1="${X(v)}" y1="${PAD.t}" x2="${X(v)}" y2="${H - PAD.b}"/><text x="${X(v)}" y="${H - 14}" text-anchor="middle">${Math.round(v / 1000)}k</text>`;
     for (let v = y0; v <= y1; v += 1000) s += `<line class="grid" x1="${PAD.l}" y1="${Y(v)}" x2="${W - PAD.r}" y2="${Y(v)}"/><text x="${PAD.l - 6}" y="${Y(v) + 4}" text-anchor="end">${Math.round(v / 1000)}k €</text>`;
     const limit = loanPriceLimit(); s += `<line class="budget" x1="${PAD.l}" y1="${Y(limit)}" x2="${W - PAD.r}" y2="${Y(limit)}"/><text x="${W - PAD.r}" y="${Y(limit) - 4}" text-anchor="end">${(fin().enabled ? UX[lang].loanLimit(eur(loanCap())) : UX[lang].maxPriceLine)} ${eur(limit)}</text>`;
-    sortCars(cars).reverse().forEach(c => { const dim = !vis.has(c.id); const r = dim ? 5 : 8 + (c.hp >= 184 ? 1 : 0); s += `<circle class="pt${dim ? " dim" : ""}" data-id="${c.id}" cx="${X(c.km)}" cy="${Y(c.price)}" r="${r}" fill="${scoreHex(c.score)}"><title>${esc(c.displayTitle || c.title)} · ${esc(eur(c.price))} · ${esc(km(c.km))} · ${c.score ?? ""}</title></circle>`; });
+    sortCars(cars).reverse().forEach(c => { const dim = !vis.has(c.id); const r = dim ? 5 : 8; s += `<circle class="pt${dim ? " dim" : ""}" data-id="${c.id}" cx="${X(c.km)}" cy="${Y(c.price)}" r="${r}" fill="${scoreHex(c.score)}"><title>${esc(c.displayTitle || c.title)} · ${esc(eur(c.price))} · ${esc(km(c.km))} · ${c.score ?? ""}</title></circle>`; });
     s += "</svg>";
     const ch = $("#chart"); ch.innerHTML = s;
     ch.querySelectorAll(".pt").forEach(p => p.onclick = () => openCar(p.dataset.id));
@@ -762,7 +764,7 @@ body.setup .wrap{display:none}
     facts.append(el("span", "fact price " + factCls("price", c.price), eur(c.price) + (c.negotiable ? " " + T.neg : "")));
     if (fin().enabled) facts.append(el("span", "fact " + (loanMonthly(c.price, costPrefs.apr) <= loanCap() ? "good" : "bad"), eur(Math.round(loanMonthly(c.price, costPrefs.apr))) + " " + UX[lang].loan));
     facts.append(el("span", "fact " + factCls("km", c.km), km(c.km)));
-    facts.append(el("span", "fact", String(c.regMonth).padStart(2, "0") + "/" + c.regYear));
+    facts.append(el("span", "fact", (c.regMonth ? String(c.regMonth).padStart(2, "0") + "/" : "") + c.regYear));
     facts.append(el("span", "fact", T.hu + " " + (tf(c, "hu") || "?")));
     facts.append(el("span", "fact", T.owners(c.owners)));
     const kpy = kmPerYear(c); if (kpy) { const u = el("span", "fact", new Intl.NumberFormat(T.locale).format(Math.round(kpy / 1000) * 1000) + " " + T.kmYear); u.title = T.kmYearTip; facts.append(u); }
@@ -779,7 +781,8 @@ body.setup .wrap{display:none}
     art.append(row); if (expanded.has(c.id)) art.append(detail(c));
     return art;
   }
-  const engineTxt = c => c.engine ? c.engine.replace(/(\d+)\s*hp\b/i, (m, n) => n + " " + T.hp) : (c.hp + " " + T.hp);
+  const engineTxt = c => c.engine ? c.engine.replace(/(\d+)\s*hp\b/i, (m, n) => n + " " + T.hp) : c.hp ? c.hp + " " + T.hp : "–";
+  const isHttp = v => typeof v === "string" && /^https?:\/\//i.test(v);
   function specRow(dl, k, v) { if (v == null || v === "") return; const d = el("div"); d.append(el("dt", null, k), el("dd", null, String(v))); dl.append(d); }
   function detail(c) {
     const d = el("div", "detail");
@@ -796,15 +799,13 @@ body.setup .wrap{display:none}
     f.append(tr);
     const dl = el("dl", "specs");
     specRow(dl, T.specs.engine, engineTxt(c)); specRow(dl, T.specs.dsgType, tf(c, "dsgType"));
-    const gen = /Golf 8/.test(c.model || "") ? "Golf 8" : /Sportstourer/.test(c.model || "") && /Leon/.test(c.model || "") ? "Leon Mk4 (2020+)" : /Leon/.test(c.model || "") ? (c.facelift ? "Leon 5F facelift" : "Leon 5F") : /Passat/.test(c.model || "") ? (c.facelift ? "Passat B8 facelift" : "Passat B8") : /Golf/.test(c.model || "") ? T.facelift[c.facelift ? 1 : 0] : (c.model || "");
-    specRow(dl, T.specs.facelift, gen);
     ["hu", "owners", "serviceHistory", "timingBelt", "dsgOil", "carplay", "camera", "colour"].forEach(k => specRow(dl, T.specs[k], tf(c, k)));
     f.append(dl);
     const eqAll = el("div", "eq"); Object.keys(T.eq).forEach(k => { if ((c.equip || {})[k]) eqAll.append(el("span", "on", T.eq[k])); }); f.append(eqAll);
     if ((c.priceHistory || []).length > 1) f.append(el("div", "pricehist", T.priceHist + ": " + c.priceHistory.map(p => fmtDate(p.date) + " " + eur(p.price)).join(" → ")));
     const links = el("div", "links");
-    const a = el("a", "primary", T.listing); a.href = c.url; a.target = "_blank"; a.rel = "noopener"; links.append(a);
-    if (c.mapsUrl) { const m = el("a", null, T.route); m.href = c.mapsUrl; m.target = "_blank"; m.rel = "noopener"; links.append(m); }
+    if (isHttp(c.url)) { const a = el("a", "primary", T.listing); a.href = c.url; a.target = "_blank"; a.rel = "noopener"; links.append(a); }
+    if (isHttp(c.mapsUrl)) { const m = el("a", null, T.route); m.href = c.mapsUrl; m.target = "_blank"; m.rel = "noopener"; links.append(m); }
     if (P.distance.preferTransit) { const b = el("a", null, T.train); b.href = transitUrl(c); b.target = "_blank"; b.rel = "noopener"; links.append(b); }
     if (c.phone) { const b = el("button", "btn", T.copy); b.type = "button"; b.onclick = () => { try { navigator.clipboard.writeText(c.phone).then(() => { b.textContent = T.copied; setTimeout(() => b.textContent = T.copy, 1200); }); } catch (e) {} }; links.append(b); }
     f.append(links); head.append(f); d.append(head);
@@ -844,12 +845,11 @@ body.setup .wrap{display:none}
     if (!cars.length) { host.append(el("p", "empty", T.loading)); return; }
     if (!list.length) { host.append(el("p", "empty", T.noMatch)); return; }
     list.forEach(c => host.append(card(c)));
-    document.body.classList.toggle("readonly", readOnly);
   }
   function renderTable(list) {
     const t = $("#cmp"); t.innerHTML = "";
     const keys = ["title", "score", "price", "km", "kmyr", "year", "hp", "dsg", "drive", "seller", "belt", "carplay", "camera", "status"];
-    const val = (c, k) => k === "title" ? (c.displayTitle || c.title) : k === "kmyr" ? (kmPerYear(c) || 0) : k === "year" ? c.regYear * 100 + c.regMonth : k === "dsg" ? gearboxLabel(c) : k === "drive" ? (tripMin(c) ?? 999) : k === "seller" ? (isDealer(c) ? 0 : 1) : k === "belt" ? (tf(c, "timingBelt") || "") : k === "carplay" ? ((c.equip || {}).carplay ? 1 : 0) : k === "camera" ? ((c.equip || {}).camera ? 1 : 0) : k === "status" ? (STATUS_RANK[c.status] ?? 5) : c[k];
+    const val = (c, k) => k === "title" ? (c.displayTitle || c.title) : k === "kmyr" ? (kmPerYear(c) || 0) : k === "year" ? c.regYear * 100 + (c.regMonth || 1) : k === "dsg" ? gearboxLabel(c) : k === "drive" ? (tripMin(c) ?? 999) : k === "seller" ? (isDealer(c) ? 0 : 1) : k === "belt" ? (tf(c, "timingBelt") || "") : k === "carplay" ? ((c.equip || {}).carplay ? 1 : 0) : k === "camera" ? ((c.equip || {}).camera ? 1 : 0) : k === "status" ? (STATUS_RANK[c.status] ?? 5) : c[k];
     const rows = costSelected.map(id => cars.find(c => c.id === id)).filter(Boolean).sort((a, b) => { const x = val(a, tableSort.k), y = val(b, tableSort.k); return (typeof x === "string" ? x.localeCompare(y) : (x ?? 0) - (y ?? 0)) * tableSort.dir; });
     const thead = el("thead"); const hr = el("tr"); const numCols = [1, 2, 3, 4, 5, 6, 8];
     T.cols.forEach((h, i) => { if (i === 8 && !P.distance.preferTransit) h = T.colDriveCar; const th = el("th", (numCols.includes(i) ? "num" : "") + (tableSort.k === keys[i] ? " sorted" : ""), h + (tableSort.k === keys[i] ? (tableSort.dir > 0 ? " ↑" : " ↓") : "")); th.onclick = () => { if (tableSort.k === keys[i]) tableSort.dir *= -1; else tableSort = { k: keys[i], dir: keys[i] === "score" ? -1 : 1 }; renderTable(visible()); }; hr.append(th); });
@@ -857,7 +857,7 @@ body.setup .wrap{display:none}
     rows.forEach(c => { const tr = el("tr"); const td0 = el("td"); const a = el("a", null, c.displayTitle || c.title); a.href = "#car-" + c.id; a.onclick = e => { e.preventDefault(); openCar(c.id); }; td0.append(a); if (c.pick) td0.append(document.createTextNode(" ✓")); tr.append(td0);
       const ts = el("td", "num"); ts.append(el("span", "sc", String(c.score ?? "–"))); ts.firstChild.style.color = scoreColor(c.score); tr.append(ts);
       const ky = kmPerYear(c);
-      tr.append(el("td", "num " + factCls("price", c.price), eur(c.price)), el("td", "num " + factCls("km", c.km), new Intl.NumberFormat(T.locale).format(c.km)), el("td", "num", ky ? new Intl.NumberFormat(T.locale).format(Math.round(ky / 1000) * 1000) : "–"), el("td", "num", String(c.regYear)), el("td", "num", String(c.hp)), el("td", null, gearboxLabel(c)), el("td", "num", tripMin(c) ? "~" + tripMin(c) + " " + T.min : "?"), el("td", null, tf(c, "sellerType")), el("td", null, tf(c, "timingBelt") || "?"), el("td", null, (c.equip || {}).carplay ? "✓" : "–"), el("td", null, (c.equip || {}).camera ? "✓" : "–"));
+      tr.append(el("td", "num " + factCls("price", c.price), eur(c.price)), el("td", "num " + factCls("km", c.km), new Intl.NumberFormat(T.locale).format(c.km)), el("td", "num", ky ? new Intl.NumberFormat(T.locale).format(Math.round(ky / 1000) * 1000) : "–"), el("td", "num", String(c.regYear)), el("td", "num", c.hp ? String(c.hp) : "–"), el("td", null, gearboxLabel(c)), el("td", "num", tripMin(c) ? "~" + tripMin(c) + " " + T.min : "?"), el("td", null, tf(c, "sellerType")), el("td", null, tf(c, "timingBelt") || "?"), el("td", null, (c.equip || {}).carplay ? "✓" : "–"), el("td", null, (c.equip || {}).camera ? "✓" : "–"));
       const tds = el("td"); tds.append(el("span", "pill s-" + c.status, T.status[c.status] || c.status)); tr.append(tds); tb.append(tr); });
     t.append(tb);
   }
@@ -868,7 +868,6 @@ body.setup .wrap{display:none}
   // ---------- saving ----------
   let saving = Promise.resolve();
   function save(id, patch, noteEl) {
-    if (readOnly) return;
     saving = saving.then(() => fetch("/api/cars/" + encodeURIComponent(id), { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(patch) }).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }))
       .then(j => { const i = cars.findIndex(c => c.id === id); if (i >= 0) cars[i] = toList({ [id]: j.car })[0]; render(); const n = noteEl && (document.querySelector(`#car-${CSS.escape(id)} .saved`) || noteEl); if (n) { n.textContent = T.saved; setTimeout(() => n.textContent = "", 1500); } })
       .catch(e => { if (noteEl) noteEl.textContent = T.saveFail; });
