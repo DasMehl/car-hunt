@@ -21,7 +21,9 @@ Cars come in two ways: an "Add a car" form on the site, and an optional Claude C
 4. Deploy, open the site, enter the password with any user name and complete the setup wizard.
 5. Add cars with "Add a car", or install the Claude routine: see [routine/README.md](routine/README.md).
 
-Run locally with `npm install && DATA_DIR=./data SYNC_KEY=dev npm start` and open http://localhost:3000.
+The server refuses to start without `SITE_PASSWORD`. `/healthz` is the only route open without it; Railway's healthcheck uses it.
+
+Run locally with `npm install && ALLOW_OPEN=1 DATA_DIR=./data SYNC_KEY=dev npm start` and open http://localhost:3000. `ALLOW_OPEN=1` runs without a password; use it only on your own machine.
 
 ## Tests
 
