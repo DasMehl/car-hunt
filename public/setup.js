@@ -8,11 +8,12 @@
     en: {
       wizard: "Set up your car hunt", settings: "Settings", next: "Next", back: "Back", save: "Save", cancel: "Cancel", finish: "Start tracking",
       steps: ["You and home", "The car", "Money", "Distance and equipment", "Problem drivetrains and weights", "Contacting sellers"],
-      name: "Name of this hunt", owner: "Your name", home: "Home address", find: "Find", found: "Found:", notFound: "Address not found", hasCar: "I have a car for viewings", languages: "Languages on the page",
-      fuels: "Fuel", gearbox: "Gearbox", bodies: "Body", minSeats: "Seats at least", include: "Only these makes (comma-separated, empty = all)", exclude: "Never these makes", models: "Models of interest (comma-separated)", yearFrom: "First registration from", yearTo: "First registration until (empty = no limit)", maxKm: "Max mileage (km)", minHp: "Min power (hp)",
+      name: "Name of this hunt", owner: "Your name", home: "Home address", find: "Find", found: "Found:", notFound: "Address not found", travel: "How do you get to viewings?", byCar: "By car", byTransit: "By public transport", languages: "Languages on the page",
+      intro: "Car Hunt keeps track of the used cars you are considering: price, mileage, distance from home, equipment and your conversations with sellers, ranked by what matters to you. Everything you set here can be changed later in Settings.",
+      fuels: "Fuel", gearbox: "Gearbox", bodies: "Body", minSeats: "Seats at least", include: "Only these makes (comma-separated, empty = all)", exclude: "Never these makes", makesPh: "e.g. VW, Skoda, Toyota", modelsPh: "e.g. Golf, Octavia, Corolla", models: "Models of interest (comma-separated)", yearFrom: "First registration from", yearTo: "First registration until (empty = no limit)", maxKm: "Max mileage (km)", minHp: "Min power (hp)",
       maxPrice: "Max asking price (€)", negotiableUpTo: "Accept up to (€) if negotiable", finance: "I want to finance", monthlyCap: "Max monthly rate (€)", months: "Months", downPayment: "Down payment (€)", apr: "Interest (APR %)",
-      maxDriveMin: "Longest drive to a viewing (min)", preferTransit: "Show public-transport times first", must: "Must have", nice: "Nice to have",
-      avoid: "Avoid these drivetrains", custom: "Add your own (name and words to match, e.g. “Rotary” and “RX-8|Wankel”)", customLabel: "Name", customMatch: "Words to match", weights: "How much each part counts in the score",
+      maxDriveMin: "Longest trip to a viewing (min)", must: "Must have", nice: "Nice to have",
+      avoid: "Avoid these drivetrains", custom: "Add your own (name and words to match, e.g. “Rotary” and “RX-8|Wankel”)", customLabel: "Name", customMatch: "Words to match", weights: "How much each part counts in the score", weightHint: "0 = ignore this part",
       outreach: "Let the Claude routine send a short first message to shortlisted sellers in my name", outLang: "Message language", sender: "Sign messages as",
       outreachHint: "The website never sends messages. Only the optional Claude routine does, and only when this is ticked.",
       fuel: { diesel: "Diesel", petrol: "Petrol", hybrid: "Hybrid", plugin: "Plug-in hybrid", electric: "Electric", lpg: "LPG" },
@@ -26,11 +27,12 @@
     de: {
       wizard: "Autosuche einrichten", settings: "Einstellungen", next: "Weiter", back: "Zurück", save: "Speichern", cancel: "Abbrechen", finish: "Los geht’s",
       steps: ["Du und dein Zuhause", "Das Auto", "Geld", "Entfernung und Ausstattung", "Problem-Antriebe und Gewichtung", "Verkäufer anschreiben"],
-      name: "Name dieser Suche", owner: "Dein Name", home: "Wohnadresse", find: "Suchen", found: "Gefunden:", notFound: "Adresse nicht gefunden", hasCar: "Ich habe ein Auto für Besichtigungen", languages: "Sprachen auf der Seite",
-      fuels: "Kraftstoff", gearbox: "Getriebe", bodies: "Karosserie", minSeats: "Mindestens Sitze", include: "Nur diese Marken (kommagetrennt, leer = alle)", exclude: "Nie diese Marken", models: "Interessante Modelle (kommagetrennt)", yearFrom: "Erstzulassung ab", yearTo: "Erstzulassung bis (leer = egal)", maxKm: "Max. Laufleistung (km)", minHp: "Mindestleistung (PS)",
+      name: "Name dieser Suche", owner: "Dein Name", home: "Wohnadresse", find: "Suchen", found: "Gefunden:", notFound: "Adresse nicht gefunden", travel: "Wie kommst du zu Besichtigungen?", byCar: "Mit dem Auto", byTransit: "Mit Bus und Bahn", languages: "Sprachen auf der Seite",
+      intro: "Car Hunt behält die Gebrauchtwagen im Blick, die für dich in Frage kommen: Preis, Kilometerstand, Entfernung von zu Hause, Ausstattung und deine Gespräche mit Verkäufern, sortiert nach dem, was dir wichtig ist. Alles hier lässt sich später in den Einstellungen ändern.",
+      fuels: "Kraftstoff", gearbox: "Getriebe", bodies: "Karosserie", minSeats: "Mindestens Sitze", include: "Nur diese Marken (kommagetrennt, leer = alle)", exclude: "Nie diese Marken", makesPh: "z. B. VW, Skoda, Toyota", modelsPh: "z. B. Golf, Octavia, Corolla", models: "Interessante Modelle (kommagetrennt)", yearFrom: "Erstzulassung ab", yearTo: "Erstzulassung bis (leer = egal)", maxKm: "Max. Laufleistung (km)", minHp: "Mindestleistung (PS)",
       maxPrice: "Höchstpreis (€)", negotiableUpTo: "Bei VB akzeptieren bis (€)", finance: "Ich möchte finanzieren", monthlyCap: "Max. Monatsrate (€)", months: "Monate", downPayment: "Anzahlung (€)", apr: "Zins (eff. %)",
-      maxDriveMin: "Längste Fahrt zur Besichtigung (Min.)", preferTransit: "Zeiten mit Bus und Bahn zuerst zeigen", must: "Muss haben", nice: "Wäre schön",
-      avoid: "Diese Antriebe meiden", custom: "Eigene hinzufügen (Name und Suchwörter, z. B. „Wankel“ und „RX-8|Wankel“)", customLabel: "Name", customMatch: "Suchwörter", weights: "Wie stark jeder Teil in die Punkte eingeht",
+      maxDriveMin: "Längste Anfahrt zur Besichtigung (Min.)", must: "Muss haben", nice: "Wäre schön",
+      avoid: "Diese Antriebe meiden", custom: "Eigene hinzufügen (Name und Suchwörter, z. B. „Wankel“ und „RX-8|Wankel“)", customLabel: "Name", customMatch: "Suchwörter", weights: "Wie stark jeder Teil in die Punkte eingeht", weightHint: "0 = diesen Teil nicht werten",
       outreach: "Die Claude-Routine darf vorgemerkten Verkäufern in meinem Namen eine kurze erste Nachricht schicken", outLang: "Sprache der Nachrichten", sender: "Nachrichten unterschreiben mit",
       outreachHint: "Die Website verschickt nie Nachrichten. Das tut nur die optionale Claude-Routine, und nur wenn dies angehakt ist.",
       fuel: { diesel: "Diesel", petrol: "Benzin", hybrid: "Hybrid", plugin: "Plug-in-Hybrid", electric: "Elektro", lpg: "Autogas" },
@@ -44,11 +46,12 @@
     pt: {
       wizard: "Configure sua busca", settings: "Configurações", next: "Próximo", back: "Voltar", save: "Salvar", cancel: "Cancelar", finish: "Começar",
       steps: ["Você e sua casa", "O carro", "Dinheiro", "Distância e equipamentos", "Motores problemáticos e pesos", "Contato com vendedores"],
-      name: "Nome desta busca", owner: "Seu nome", home: "Endereço de casa", find: "Buscar", found: "Encontrado:", notFound: "Endereço não encontrado", hasCar: "Tenho carro para as visitas", languages: "Idiomas da página",
-      fuels: "Combustível", gearbox: "Câmbio", bodies: "Carroceria", minSeats: "Lugares no mínimo", include: "Só estas marcas (separadas por vírgula, vazio = todas)", exclude: "Nunca estas marcas", models: "Modelos de interesse (separados por vírgula)", yearFrom: "Primeiro registro a partir de", yearTo: "Primeiro registro até (vazio = sem limite)", maxKm: "Quilometragem máx. (km)", minHp: "Potência mín. (cv)",
+      name: "Nome desta busca", owner: "Seu nome", home: "Endereço de casa", find: "Buscar", found: "Encontrado:", notFound: "Endereço não encontrado", travel: "Como você vai às visitas?", byCar: "De carro", byTransit: "De transporte público", languages: "Idiomas da página",
+      intro: "O Car Hunt acompanha os carros usados que você está considerando: preço, quilometragem, distância de casa, equipamentos e suas conversas com vendedores, em ordem do que importa para você. Tudo o que você definir aqui pode ser alterado depois nas Configurações.",
+      fuels: "Combustível", gearbox: "Câmbio", bodies: "Carroceria", minSeats: "Lugares no mínimo", include: "Só estas marcas (separadas por vírgula, vazio = todas)", exclude: "Nunca estas marcas", makesPh: "ex.: VW, Skoda, Toyota", modelsPh: "ex.: Golf, Octavia, Corolla", models: "Modelos de interesse (separados por vírgula)", yearFrom: "Primeiro registro a partir de", yearTo: "Primeiro registro até (vazio = sem limite)", maxKm: "Quilometragem máx. (km)", minHp: "Potência mín. (cv)",
       maxPrice: "Preço máximo (€)", negotiableUpTo: "Aceitar até (€) se negociável", finance: "Quero financiar", monthlyCap: "Parcela máxima (€)", months: "Meses", downPayment: "Entrada (€)", apr: "Juros (% ao ano)",
-      maxDriveMin: "Viagem máxima até a visita (min)", preferTransit: "Mostrar primeiro o tempo de transporte público", must: "Obrigatório", nice: "Desejável",
-      avoid: "Evitar estes motores e câmbios", custom: "Adicionar o seu (nome e palavras, ex.: “Wankel” e “RX-8|Wankel”)", customLabel: "Nome", customMatch: "Palavras", weights: "Quanto cada parte conta na pontuação",
+      maxDriveMin: "Viagem máxima até a visita (min)", must: "Obrigatório", nice: "Desejável",
+      avoid: "Evitar estes motores e câmbios", custom: "Adicionar o seu (nome e palavras, ex.: “Wankel” e “RX-8|Wankel”)", customLabel: "Nome", customMatch: "Palavras", weights: "Quanto cada parte conta na pontuação", weightHint: "0 = ignorar esta parte",
       outreach: "Permitir que a rotina do Claude envie uma primeira mensagem curta aos vendedores salvos em meu nome", outLang: "Idioma das mensagens", sender: "Assinar mensagens como",
       outreachHint: "O site nunca envia mensagens. Só a rotina opcional do Claude, e só se isto estiver marcado.",
       fuel: { diesel: "Diesel", petrol: "Gasolina", hybrid: "Híbrido", plugin: "Híbrido plug-in", electric: "Elétrico", lpg: "GLP" },
@@ -66,39 +69,67 @@
   const set = (o, path, v) => { const ks = path.split("."); const last = ks.pop(); ks.reduce((x, k) => x[k], o)[last] = v; };
   const list = s => s.split(",").map(x => x.trim()).filter(Boolean);
 
-  // Field builders return [element, read()] where read() writes the value into the profile.
-  function text(t, p, path, label, type = "text") { const i = el("input", { type, value: get(p, path) ?? "" }); return [el("label", {}, t[label] || label, i), () => set(p, path, i.value.trim())]; }
+  // Field builders return [element, read(), input?] where read() writes the value into the profile
+  // and returns a label (or a list of labels) for number fields that are empty or not a number.
+  function text(t, p, path, label, type = "text") { const i = el("input", { type, value: get(p, path) ?? "" }); return [el("label", {}, t[label] || label, i), () => set(p, path, i.value.trim()), i]; }
   function number(t, p, path, label, opts = {}) {
-    const v = get(p, path); const i = el("input", { type: "number", value: v ?? "", min: opts.min, max: opts.max, step: opts.step || 1, required: !opts.nullable });
+    const v = get(p, path); const i = el("input", { type: "number", value: v ?? "", min: opts.min, max: opts.max, step: opts.step || 1, required: !opts.nullable, inputmode: "numeric" });
     return [el("label", {}, t[label] || label, i), () => {
       const raw = i.value.trim();
       if (raw === "" && opts.nullable) { set(p, path, null); return; }
       if (raw === "" || !Number.isFinite(Number(raw))) return t[label] || label; // reported by readStep, profile left unchanged
       set(p, path, Number(raw));
-    }];
+    }, i];
   }
-  function check(t, p, path, label) { const i = el("input", { type: "checkbox" }); i.checked = !!get(p, path); return [el("div", { class: "opts" }, el("label", {}, i, t[label] || label)), () => set(p, path, i.checked)]; }
+  function check(t, p, path, label) { const i = el("input", { type: "checkbox" }); i.checked = !!get(p, path); return [el("div", { class: "opts" }, el("label", {}, i, t[label] || label)), () => set(p, path, i.checked), i]; }
   function multi(t, p, path, label, options, names) {
     const cur = new Set(get(p, path)); const boxes = options.map(o => { const b = el("input", { type: "checkbox", value: o }); b.checked = cur.has(o); return b; });
     return [el("fieldset", {}, el("legend", { text: t[label] || label }), el("div", { class: "opts" }, boxes.map((b, i) => el("label", {}, b, names[options[i]])))), () => set(p, path, boxes.filter(b => b.checked).map(b => b.value))];
   }
   function select(t, p, path, label, options, names) {
     const s = el("select", {}, options.map(o => { const op = el("option", { value: o, text: names[o] }); op.selected = get(p, path) === o; return op; }));
-    return [el("label", {}, t[label] || label, s), () => set(p, path, s.value)];
+    return [el("label", {}, t[label] || label, s), () => set(p, path, s.value), s];
   }
-  function csv(t, p, path, label) { const i = el("input", { type: "text", value: (get(p, path) || []).join(", ") }); return [el("label", {}, t[label] || label, i), () => set(p, path, list(i.value))]; }
+  function csv(t, p, path, label, ph) { const i = el("input", { type: "text", value: (get(p, path) || []).join(", "), placeholder: ph ? t[ph] : null }); return [el("label", {}, t[label] || label, i), () => set(p, path, list(i.value)), i]; }
+  // Short fields side by side; wraps to one column on narrow screens.
+  function group(...fields) { return [el("div", { class: "frow" }, fields.map(f => f[0])), () => fields.map(f => f[1]())]; }
+  // A checkbox that shows its dependent fields only while it is ticked. Hidden fields are not read, so their values stay in the profile.
+  function reveal(ctrl, fields, onOpen) {
+    const box = el("div", { class: "sub" }, fields.map(f => f[0]));
+    const sync = () => { box.hidden = !ctrl[2].checked; if (ctrl[2].checked && onOpen) onOpen(); };
+    ctrl[2].addEventListener("change", sync); sync();
+    return [el("div", { class: "grp" }, ctrl[0], box), () => [ctrl[1](), ...(box.hidden ? [] : fields.map(f => f[1]()))], null, () => sync()];
+  }
+  // One question sets both owner.hasCar and distance.preferTransit.
+  function travelField(t, p) {
+    const byCar = !p.distance.preferTransit;
+    const radio = (v, label, on) => { const r = el("input", { type: "radio", name: "sx-travel", value: v }); r.checked = on; return [r, el("label", {}, r, label)]; };
+    const [car, carL] = radio("car", t.byCar, byCar), [, busL] = radio("transit", t.byTransit, !byCar);
+    return [el("fieldset", { role: "radiogroup" }, el("legend", { text: t.travel }), el("div", { class: "opts" }, carL, busL)), () => { p.owner.hasCar = car.checked; p.distance.preferTransit = !car.checked; }];
+  }
 
   function homeField(t, p) {
-    const i = el("input", { type: "text", value: p.home ? p.home.label : "" }); const out = el("p", { class: "hint", text: p.home ? `${t.found} ${p.home.label}` : "" });
-    const b = el("button", { type: "button", text: t.find, onclick: async () => {
-      out.textContent = "…";
+    const i = el("input", { type: "text", value: p.home ? p.home.label : "", autocomplete: "street-address", maxlength: 200 }); const out = el("p", { class: "hint", "aria-live": "polite" });
+    let lastHome = p.home;
+    const b = el("button", { type: "button", class: "primary", text: t.find });
+    const find = async () => {
+      const q = i.value.trim().slice(0, 200); if (!q) { i.focus(); return; }
+      out.textContent = "…"; b.disabled = true;
       try {
-        const r = await fetch("/api/geocode?q=" + encodeURIComponent(i.value));
+        const r = await fetch("/api/geocode?q=" + encodeURIComponent(q));
         if (!r.ok) throw new Error(String(r.status));
-        p.home = await r.json(); out.textContent = `${t.found} ${p.home.label}`;
+        const g = await r.json();
+        // Keep the address as typed; the long geocoder name is only shown as confirmation.
+        p.home = lastHome = { label: q, lat: g.lat, lon: g.lon }; out.textContent = `${t.found} ${g.label}`;
       } catch (e) { out.textContent = t.notFound; }
-    } });
-    return [el("label", {}, t.home, el("div", { class: "row" }, i, b), out), () => {}];
+      finally { b.disabled = false; }
+    };
+    b.onclick = find;
+    // Enter looks the address up instead of submitting the form.
+    i.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); e.stopPropagation(); find(); } });
+    // Changing the text invalidates the coordinates until Find is pressed again.
+    i.addEventListener("input", () => { p.home = lastHome && i.value.trim() === lastHome.label ? lastHome : null; if (!p.home) out.textContent = ""; });
+    return [el("div", { class: "fld" }, el("label", { for: "sx-home" }, t.home), el("div", { class: "addr" }, Object.assign(i, { id: "sx-home" }), b), out), () => {}];
   }
 
   function avoidField(t, p, catalogue, lang) {
@@ -112,7 +143,7 @@
     const addRow = (a = { label: "", match: "", on: true }) => {
       const c = el("input", { type: "checkbox" }); c.checked = a.on !== false;
       const n = el("input", { type: "text", value: a.label, placeholder: t.customLabel }); const m = el("input", { type: "text", value: a.match, placeholder: t.customMatch });
-      custom.push([c, n, m]); rows.append(el("div", { class: "row" }, el("div", { class: "opts" }, el("label", {}, c, t.customOn)), n, m));
+      custom.push([c, n, m]); rows.append(el("div", { class: "frow" }, el("div", { class: "opts" }, el("label", {}, c, t.customOn)), n, m));
     };
     customs.forEach(addRow); addRow();
     const read = () => {
@@ -126,17 +157,30 @@
 
   function weightsField(t, p) {
     const inputs = Object.fromEntries(Object.keys(t.w).map(k => [k, el("input", { type: "range", min: 0, max: 5, step: 0.5, value: p.weights[k] })]));
-    return [el("fieldset", {}, el("legend", { text: t.weights }), el("div", { class: "row" }, Object.entries(inputs).map(([k, i]) => el("label", {}, t.w[k], i)))), () => { for (const [k, i] of Object.entries(inputs)) p.weights[k] = Number(i.value); }];
+    const fmt = v => new Intl.NumberFormat(document.documentElement.lang || "en", { maximumFractionDigits: 1 }).format(Number(v));
+    const labels = Object.entries(inputs).map(([k, i]) => {
+      const out = el("output", { class: "wv", text: fmt(i.value) });
+      i.addEventListener("input", () => { out.textContent = fmt(i.value); });
+      return el("label", { class: "weight" }, el("span", { class: "wl" }, el("span", { text: t.w[k] }), out), i);
+    });
+    return [el("fieldset", {}, el("legend", { text: t.weights }), el("p", { class: "hint", text: t.weightHint }), el("div", { class: "frow" }, labels)), () => { for (const [k, i] of Object.entries(inputs)) p.weights[k] = Number(i.value); }];
   }
 
   function steps(t, p, catalogue, lang) {
+    const owner = text(t, p, "owner.name", "owner"), sender = text(t, p, "outreach.senderName", "sender");
+    // Prefill the signature with the name from step 1 when it is still empty.
+    const prefill = () => { if (!sender[2].value.trim()) sender[2].value = owner[2].value.trim(); };
     return [
-      [text(t, p, "name", "name"), text(t, p, "owner.name", "owner"), homeField(t, p), check(t, p, "owner.hasCar", "hasCar"), multi(t, p, "languages", "languages", ["en", "de", "pt"], t.lang)],
-      [multi(t, p, "car.fuels", "fuels", FUELS, t.fuel), select(t, p, "car.gearbox", "gearbox", ["automatic", "manual", "any"], t.gb), multi(t, p, "car.bodies", "bodies", BODIES, t.body), number(t, p, "car.minSeats", "minSeats", { min: 2, max: 9 }), csv(t, p, "car.makes.include", "include"), csv(t, p, "car.makes.exclude", "exclude"), csv(t, p, "car.models", "models"), number(t, p, "car.yearFrom", "yearFrom", { min: 1990, max: 2100 }), number(t, p, "car.yearTo", "yearTo", { min: 1990, max: 2100, nullable: true }), number(t, p, "car.maxKm", "maxKm", { min: 0, max: 1000000, step: 5000 }), number(t, p, "car.minHp", "minHp", { min: 0, max: 1000 })],
-      [number(t, p, "money.maxPrice", "maxPrice", { min: 0, max: 1000000, step: 250 }), number(t, p, "money.negotiableUpTo", "negotiableUpTo", { min: 0, max: 1000000, step: 250 }), check(t, p, "money.finance.enabled", "finance"), number(t, p, "money.finance.monthlyCap", "monthlyCap", { min: 0, max: 100000 }), number(t, p, "money.finance.months", "months", { min: 6, max: 120 }), number(t, p, "money.finance.downPayment", "downPayment", { min: 0, max: 1000000, step: 250 }), number(t, p, "money.finance.apr", "apr", { min: 0, max: 30, step: 0.1 })],
-      [number(t, p, "distance.maxDriveMin", "maxDriveMin", { min: 5, max: 600, step: 5 }), check(t, p, "distance.preferTransit", "preferTransit"), multi(t, p, "equipment.must", "must", EQUIP, t.eq), multi(t, p, "equipment.nice", "nice", EQUIP, t.eq)],
+      [text(t, p, "name", "name"), owner, homeField(t, p), travelField(t, p), multi(t, p, "languages", "languages", ["en", "de", "pt"], t.lang)],
+      [multi(t, p, "car.fuels", "fuels", FUELS, t.fuel), select(t, p, "car.gearbox", "gearbox", ["automatic", "manual", "any"], t.gb), multi(t, p, "car.bodies", "bodies", BODIES, t.body),
+        csv(t, p, "car.makes.include", "include", "makesPh"), csv(t, p, "car.makes.exclude", "exclude", "makesPh"), csv(t, p, "car.models", "models", "modelsPh"),
+        group(number(t, p, "car.minSeats", "minSeats", { min: 2, max: 9 }), number(t, p, "car.yearFrom", "yearFrom", { min: 1990, max: 2100 }), number(t, p, "car.yearTo", "yearTo", { min: 1990, max: 2100, nullable: true })),
+        group(number(t, p, "car.maxKm", "maxKm", { min: 0, max: 1000000, step: 5000 }), number(t, p, "car.minHp", "minHp", { min: 0, max: 1000 }))],
+      [group(number(t, p, "money.maxPrice", "maxPrice", { min: 0, max: 1000000, step: 250 }), number(t, p, "money.negotiableUpTo", "negotiableUpTo", { min: 0, max: 1000000, step: 250 })),
+        reveal(check(t, p, "money.finance.enabled", "finance"), [group(number(t, p, "money.finance.monthlyCap", "monthlyCap", { min: 0, max: 100000 }), number(t, p, "money.finance.months", "months", { min: 6, max: 120 }), number(t, p, "money.finance.downPayment", "downPayment", { min: 0, max: 1000000, step: 250 }), number(t, p, "money.finance.apr", "apr", { min: 0, max: 30, step: 0.1 }))])],
+      [number(t, p, "distance.maxDriveMin", "maxDriveMin", { min: 5, max: 600, step: 5 }), multi(t, p, "equipment.must", "must", EQUIP, t.eq), multi(t, p, "equipment.nice", "nice", EQUIP, t.eq)],
       [avoidField(t, p, catalogue, lang), weightsField(t, p)],
-      [check(t, p, "outreach.enabled", "outreach"), [el("p", { class: "hint", text: t.outreachHint }), () => {}], select(t, p, "outreach.language", "outLang", ["de", "en", "pt"], t.lang), text(t, p, "outreach.senderName", "sender")]
+      [reveal(check(t, p, "outreach.enabled", "outreach"), [select(t, p, "outreach.language", "outLang", ["de", "en", "pt"], t.lang), sender], prefill), [el("p", { class: "hint", text: t.outreachHint }), () => {}]]
     ];
   }
 
@@ -157,25 +201,34 @@
     if (mode === "wizard") p.avoid = catalogue.map(d => ({ id: d.id, on: d.default }));
     const all = steps(t, p, catalogue, lang);
     const err = el("p", { class: "err" });
-    const dlg = el("dialog", { class: "sx" });
+    const dlg = el("dialog", { class: "sx" + (mode === "wizard" ? " wiz" : "") });
     const form = el("form", { method: "dialog" });
-    let at = 0, saved = false;
+    const intro = el("p", { class: "intro", text: t.intro });
+    let at = 0, saved = false, busy = false;
     const show = () => {
       form.innerHTML = "";
       const sections = mode === "wizard" ? [at] : all.map((_, i) => i);
-      form.append(el("h2", { text: mode === "wizard" ? `${t.wizard} · ${at + 1}/${all.length}` : t.settings }));
-      if (loadFail) form.append(el("p", { class: "err", text: t.loadFail }));
-      sections.forEach(i => form.append(el("fieldset", {}, el("h3", { text: t.steps[i] }), all[i].map(([node]) => node))));
+      const head = el("div", { class: "sxhead" }, el("h2", { text: mode === "wizard" ? t.wizard : t.settings }));
+      // Stepper: every step by name, the current one highlighted, earlier ones marked done.
+      if (mode === "wizard") head.append(el("ol", { class: "stepper" }, t.steps.map((name, i) => el("li", { class: i < at ? "done" : i === at ? "cur" : "", "aria-current": i === at ? "step" : null }, el("span", { class: "dot", text: i < at ? "✓" : String(i + 1) }), el("span", { class: "nm", text: name })))));
+      const body = el("div", { class: "sxbody" });
+      if (loadFail) body.append(el("p", { class: "err", text: t.loadFail }));
+      sections.forEach(i => {
+        if (mode === "wizard" && i === 0) body.append(intro);
+        body.append(el("fieldset", {}, el("h3", { text: t.steps[i] }), all[i].map(([node]) => node)));
+        all[i].forEach(f => typeof f[3] === "function" && f[3]());
+      });
       const bar = el("div", { class: "bar" });
-      if (mode === "wizard" && at > 0) bar.append(el("button", { type: "button", text: t.back, onclick: () => { readStep(at); at--; show(); } }));
+      if (mode === "wizard" && at > 0) bar.append(el("button", { type: "button", text: t.back, onclick: () => { readStep(at); err.textContent = ""; at--; show(); } }));
       if (mode === "settings") bar.append(el("button", { type: "button", text: t.cancel, onclick: () => dlg.close() }));
       bar.append(el("span"));
       if (mode === "wizard" && at < all.length - 1) bar.append(el("button", { type: "button", class: "primary", text: t.next, onclick: next }));
       else bar.append(el("button", { type: "button", class: "primary", text: mode === "wizard" ? t.finish : t.save, onclick: submit }));
-      form.append(err, bar);
+      form.append(head, body, el("div", { class: "sxfoot" }, err, bar));
+      body.scrollTop = 0;
     };
     // readStep returns the labels of number fields that are empty or not a number.
-    const readStep = i => all[i].map(([, read]) => read()).filter(x => typeof x === "string");
+    const readStep = i => all[i].map(([, read]) => read()).flat(Infinity).filter(x => typeof x === "string");
     const badNumbers = bad => { if (!bad.length) return false; err.textContent = `${t.needNumber} ${bad.join(", ")}`; return true; };
     function next() {
       if (badNumbers(readStep(at))) return;
@@ -183,11 +236,13 @@
       err.textContent = ""; at++; show();
     }
     async function submit() {
+      if (busy) return;
       if (badNumbers(all.flatMap((_, i) => readStep(i)))) return;
       if (!p.home) { err.textContent = t.homeNeeded; return; }
-      let r;
+      let r; const btn = form.querySelector(".bar .primary"); busy = true; if (btn) btn.disabled = true;
       try { r = await fetch("/api/profile", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(p) }); }
       catch (e) { err.textContent = `${t.netFail} ${e.message}`; return; }
+      finally { busy = false; if (btn) btn.disabled = false; }
       if (!r.ok) { const j = await r.json().catch(() => ({})); err.textContent = (j.details || [String(r.status)]).join("\n"); return; }
       saved = true; dlg.close(); document.body.classList.remove("setup"); onSaved && onSaved();
     }
@@ -210,18 +265,22 @@
     const err = el("p", { class: "err" });
     const dlg = el("dialog", { class: "sx" });
     const form = el("form", { method: "dialog" },
-      el("h2", { text: t.add }),
-      el("label", {}, t.url, f.url), el("label", {}, t.title, f.title),
-      el("div", { class: "row" }, el("label", {}, t.price, f.price), el("label", {}, t.km, f.km), el("label", {}, t.year, f.regYear), el("label", {}, t.hp, f.hp)),
-      el("div", { class: "row" }, el("label", {}, t.fuels, f.fuel), el("label", {}, t.gearbox, f.gearbox), el("label", {}, t.town, f.town)),
-      el("label", {}, t.notes, f.notes), err,
-      el("div", { class: "bar" }, el("button", { type: "button", text: t.cancel, onclick: () => dlg.close() }), el("button", { type: "submit", class: "primary", text: t.add })));
+      el("div", { class: "sxhead" }, el("h2", { text: t.add })),
+      el("div", { class: "sxbody" }, el("label", {}, t.url, f.url), el("label", {}, t.title, f.title),
+      el("div", { class: "frow" }, el("label", {}, t.price, f.price), el("label", {}, t.km, f.km), el("label", {}, t.year, f.regYear), el("label", {}, t.hp, f.hp)),
+      el("div", { class: "frow" }, el("label", {}, t.fuels, f.fuel), el("label", {}, t.gearbox, f.gearbox), el("label", {}, t.town, f.town)),
+      el("label", {}, t.notes, f.notes)),
+      el("div", { class: "sxfoot" }, err, el("div", { class: "bar" }, el("button", { type: "button", text: t.cancel, onclick: () => dlg.close() }), el("span"), el("button", { type: "submit", class: "primary", text: t.add }))));
     form.onsubmit = async e => {
       e.preventDefault();
       const body = { url: f.url.value.trim(), title: f.title.value.trim(), price: Number(f.price.value), km: Number(f.km.value), regYear: Number(f.regYear.value), fuel: f.fuel.value, gearbox: f.gearbox.value, town: f.town.value.trim() };
       if (f.hp.value) body.hp = Number(f.hp.value);
       if (f.notes.value.trim()) body.notes = f.notes.value.trim();
-      const r = await fetch("/api/cars", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+      const btn = form.querySelector(".bar .primary"); if (btn.disabled) return; btn.disabled = true;
+      let r;
+      try { r = await fetch("/api/cars", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }); }
+      catch (x) { err.textContent = `${t.netFail} ${x.message}`; return; }
+      finally { btn.disabled = false; }
       if (!r.ok) { const j = await r.json().catch(() => ({})); err.textContent = (j.details || [String(r.status)]).join("\n"); return; }
       dlg.close(); onSaved && onSaved();
     };
