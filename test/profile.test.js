@@ -43,3 +43,11 @@ test("custom avoid entries need a label and a valid pattern", () => {
 test("a missing profile body is rejected", () => {
   assert.match(validateProfile(null).errors.join(), /profile must be an object/);
 });
+
+test("setup.js default profile matches lib/profile.js", () => {
+  const src = require("node:fs").readFileSync(require("node:path").join(__dirname, "..", "public", "setup.js"), "utf8");
+  new Function(src); // the whole file must parse, not just the slice below
+  const body = src.slice(src.indexOf("function defaultProfile() {"), src.indexOf("async function open("));
+  const browserDefault = new Function(body + "; return defaultProfile();")();
+  assert.deepEqual(browserDefault, defaultProfile());
+});

@@ -288,6 +288,16 @@ tr:last-child td { border-bottom: 0; }
   .howto { font-size: 12.5px; }
 }
 @media (prefers-reduced-motion: no-preference) { .photos .thumbs img { transition: opacity .15s; } }
+dialog.sx{border:1px solid var(--line);border-radius:10px;padding:0;max-width:720px;width:calc(100% - 32px);background:var(--surface);color:var(--fg)}
+dialog.sx::backdrop{background:rgba(0,0,0,.35)}
+.sx form{padding:18px 20px;display:grid;gap:14px}
+.sx h2{margin:0}.sx fieldset{border:0;padding:0;margin:0;display:grid;gap:10px}
+.sx label{display:grid;gap:4px;font-size:14px}.sx .opts{display:flex;flex-wrap:wrap;gap:6px 14px}
+.sx .opts label{display:flex;gap:6px;align-items:center}.sx input[type=text],.sx input[type=number],.sx input[type=url],.sx select,.sx textarea{padding:7px;border:1px solid var(--line);border-radius:7px;background:var(--surface);color:var(--fg)}
+.sx .row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.sx .bar{display:flex;justify-content:space-between;gap:8px;position:sticky;bottom:0;background:var(--surface);padding-top:8px}
+.sx .err{color:var(--bad);font-size:14px;white-space:pre-line}.sx .hint{color:var(--muted);font-size:13px;margin:0}
+body.setup .wrap{display:none}
 </style>
 </head>
 <body>
@@ -298,6 +308,8 @@ tr:last-child td { border-bottom: 0; }
       <div class="sub" id="sub"></div>
     </div>
     <div class="hright">
+      <button class="chip" id="addcar" type="button"></button>
+      <button class="chip" id="settings" type="button"></button>
       <button class="newpill" id="newpill" type="button" hidden></button>
       <div class="lang" role="group" aria-label="Language">
         <button type="button" data-lang="en">EN</button><button type="button" data-lang="de">DE</button><button type="button" data-lang="pt">PT-BR</button>
@@ -335,6 +347,7 @@ tr:last-child td { border-bottom: 0; }
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="criteria.js"></script>
+<script src="setup.js"></script>
 <script>
 (function () {
   let P = null, CAT = [];
@@ -579,6 +592,9 @@ tr:last-child td { border-bottom: 0; }
     const n = cars.filter(isNew).length; const p = $("#newpill");
     p.hidden = !n; p.textContent = T.newSince(n);
     p.onclick = () => { try { localStorage.setItem("carhunt-lastvisit", new Date().toISOString()); } catch (e) {} lastVisit = new Date().toISOString(); render(); };
+    const ax = { en: ["Add a car", "Settings"], de: ["Auto hinzufügen", "Einstellungen"], pt: ["Adicionar carro", "Configurações"] }[lang];
+    $("#addcar").textContent = ax[0]; $("#addcar").onclick = () => Setup.addCar({ lang, onSaved: () => load() });
+    $("#settings").textContent = ax[1]; $("#settings").onclick = () => Setup.open({ mode: "settings", lang, onSaved: () => load() });
     $("#maptitle").textContent = T.map; $("#charttitle").textContent = T.chart; $("#listtitle").textContent = T.list; $("#cmptitle").textContent = UX[lang].cmp; $("#howto").textContent = UX[lang].howto;
     const nav = $("#jumpnav"); nav.innerHTML = ""; ["visit", "decision", "costs", "listings", "explore", "compare"].forEach((id, i) => { const a = el("a", null, UX[lang].nav[i]); a.href = "#" + id; nav.append(a); });
     // Phone bar: filter toggle with the number of active filters, and map/chart tabs.
