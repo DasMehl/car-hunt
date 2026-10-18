@@ -85,5 +85,30 @@ test("every catalogue entry is well formed", () => {
     assert.equal(typeof d.default, "boolean");
     for (const l of ["en", "de", "pt"]) { assert.ok(d.label[l], d.id + " label " + l); assert.ok(d.reason[l], d.id + " reason " + l); }
     assert.doesNotThrow(() => new RegExp(d.test, "i"));
+    if (d.unless) assert.doesNotThrow(() => new RegExp(d.unless, "i"));
   }
+});
+
+test("fix round 1: makes, fuels, gearbox", () => {
+  assert.equal(C.makeOf({ model: "Land Rover Discovery Sport" }), "Land Rover");
+  assert.equal(C.makeOf({ model: "Alfa Romeo Giulia" }), "Alfa Romeo");
+  assert.equal(C.normMake("land rover"), "Land Rover");
+  assert.equal(C.fuelOf({ title: "BMW 320d xDrive Mild-Hybrid" }), "diesel");
+  assert.equal(C.fuelOf({ title: "Mercedes C 220 d 48V Mild Hybrid" }), "diesel");
+  assert.equal(C.fuelOf({ title: "Mercedes-Benz C 220 d T-Modell" }), "diesel");
+  assert.equal(C.gearboxOf({ gearbox: "Manuell" }), "manual");
+  assert.equal(C.fuelOf({ title: "Audi e-tron 55 quattro" }), "electric");
+  assert.equal(C.fuelOf({ title: "Audi A3 Sportback e-tron" }), "plugin");
+  assert.equal(C.fuelOf({ title: "Tesla Model 3" }), "electric");
+});
+
+test("fix round 1: drivetrain matching", () => {
+  const p = { avoid: [{ id: "vw-ea111", on: true }, { id: "bmw-n47", on: true }] };
+  const ids = c => C.avoidHits(c, p, catalogue).map(d => d.id);
+  assert.deepEqual(ids({ title: "VW Golf VII 1.4 TSI", model: "VW Golf VII", engine: "1.4 TSI 122 hp", regYear: 2013, regMonth: 6 }), []);
+  assert.deepEqual(ids({ model: "VW Touran", engine: "1.4 TSI 140 hp", regYear: 2013 }), ["vw-ea111"]);
+  const n47 = { title: "BMW 318d Touring", model: "BMW 3 Series Touring", engine: "2.0 diesel 143 hp", regYear: 2014, regMonth: 6 };
+  assert.deepEqual(ids(n47), ["bmw-n47"]);
+  assert.deepEqual(ids({ ...n47, engine: "2.0 diesel B47" }), []);
+  assert.deepEqual(ids({ title: "BMW 320d Touring", model: "BMW 320d Touring", engine: "2.0 diesel" }), []);
 });

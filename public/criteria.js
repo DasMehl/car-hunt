@@ -4,7 +4,8 @@
   else root.Criteria = factory();
 })(typeof self !== "undefined" ? self : this, function () {
   const WEIGHT_KEYS = ["km", "docs", "gearbox", "seller", "price", "distance", "equip"];
-  const ALIASES = { volkswagen: "VW", vw: "VW", mercedes: "Mercedes-Benz", "mercedes-benz": "Mercedes-Benz", "škoda": "Skoda", skoda: "Skoda", "citroën": "Citroen", citroen: "Citroen", bmw: "BMW", ds: "DS", kia: "Kia", mini: "Mini", seat: "Seat", cupra: "Cupra" };
+  const ALIASES = { volkswagen: "VW", vw: "VW", mercedes: "Mercedes-Benz", "mercedes-benz": "Mercedes-Benz", "škoda": "Skoda", skoda: "Skoda", "citroën": "Citroen", citroen: "Citroen", bmw: "BMW", ds: "DS", kia: "Kia", mini: "Mini", seat: "Seat", cupra: "Cupra", "land rover": "Land Rover", "alfa romeo": "Alfa Romeo", "aston martin": "Aston Martin", "rolls-royce": "Rolls-Royce", "rolls royce": "Rolls-Royce", "mercedes-amg": "Mercedes-Benz" };
+  const MULTI = /^(land rover|alfa romeo|aston martin|rolls[- ]royce|mercedes-amg)\b/i;
 
   function normMake(s) {
     if (!s) return null;
@@ -15,23 +16,26 @@
   function makeOf(car) {
     if (car.make) return normMake(car.make);
     const name = String(car.model || car.title || "").trim();
+    const m = name.match(MULTI);
+    if (m) return normMake(m[1].replace(/\s+/g, " "));
     if (/^mercedes/i.test(name)) return "Mercedes-Benz";
     return normMake(name.split(/\s+/)[0]);
   }
   function fuelOf(car) {
     if (car.fuel) { const f = String(car.fuel).toLowerCase(); return /plug/.test(f) ? "plugin" : f; }
-    const t = [car.engine, car.title, car.displayTitle].filter(Boolean).join(" ");
-    if (/plug-?in|PHEV|e-?tron|\bGTE\b|\b\d{3}xe\b|\b\d{3}e\b/i.test(t)) return "plugin";
+    const t = [car.engine, car.title, car.displayTitle].filter(Boolean).join(" ").replace(/mild[- ]?hybrid|\b48 ?V\b/gi, " ");
+    if (/e-?tron/i.test(t)) return /TFSI|Sportback|A3|Q7|Q5|A6|A7|A8/.test(t) ? "plugin" : "electric";
+    if (/plug-?in|PHEV|\bGTE\b|\b\d{3}xe\b|\b\d{3}e\b/i.test(t)) return "plugin";
     if (/hybrid/i.test(t)) return "hybrid";
-    if (/electric|\bEV\b|e-Golf|kWh/i.test(t)) return "electric";
+    if (/electric|Elektro|\bBEV\b|Tesla|\bEV\b|e-Golf|kWh/i.test(t)) return "electric";
     if (/\bLPG\b|Autogas/i.test(t)) return "lpg";
-    if (/TDI|diesel|CDI|CDTI|dCi|HDi|CRDi|D-4D|\b\d{3}d\b/i.test(t)) return "diesel";
+    if (/TDI|diesel|CDI|CDTI|dCi|HDi|CRDi|D-4D|\b\d{3} ?d\b/i.test(t)) return "diesel";
     if (/TSI|TFSI|petrol|benzin|gasoline|\b\d{3}i\b|MPI|Skyactiv-G/i.test(t)) return "petrol";
     return null;
   }
   function gearboxOf(car) {
     const t = [car.gearbox, car.dsgType].filter(Boolean).join(" ");
-    if (/manual|schalt/i.test(t)) return "manual";
+    if (/manual|manuell|schalt/i.test(t)) return "manual";
     if (/auto|DSG|DCT|tronic|CVT|steptronic|torque/i.test(t)) return "automatic";
     return null;
   }
@@ -56,8 +60,10 @@
       if (!def) continue;
       if (def.makes && !def.makes.includes(make)) continue;
       if (def.fuel && fuel && def.fuel !== fuel) continue;
-      if (def.from && car.regYear && ym < def.from) continue;
-      if (def.to && car.regYear && ym > def.to) continue;
+      if ((def.from || def.to) && !car.regYear) continue;
+      if (def.from && ym < def.from) continue;
+      if (def.to && ym > def.to) continue;
+      if (def.unless && new RegExp(def.unless, "i").test(text)) continue;
       if (def.test && !new RegExp(def.test, "i").test(text)) continue;
       hits.push(def);
     }
