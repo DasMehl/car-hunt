@@ -89,5 +89,17 @@
     for (const d of avoidHits(car, p, catalogue)) out.push({ key: "avoid", value: d.id, def: d });
     return out;
   }
-  return { WEIGHT_KEYS, normMake, makeOf, fuelOf, gearboxOf, scoreCar, avoidHits, checkCriteria };
+  // Partial rating from listing data only (for cars without a routine assessment): docs, gearbox and seller stay unknown.
+  function estimateRating(car, profile) {
+    const p = profile, r = {};
+    const pos = v => v != null && v !== "" && Number.isFinite(Number(v)) && Number(v) >= 0;
+    if (pos(car.km) && p.car.maxKm > 0) { const f = Number(car.km) / p.car.maxKm; r.km = f <= 0.7 ? 9 : f <= 0.85 ? 7 : f <= 1 ? 5 : 3; }
+    if (pos(car.price)) { const v = Number(car.price), m = p.money; r.price = v <= 0.85 * m.maxPrice ? 9 : v <= m.maxPrice ? 7 : v <= m.negotiableUpTo ? 5 : 2; }
+    const trip = Number(p.distance.preferTransit ? car.transitMin : car.driveMin);
+    if (Number.isFinite(trip) && trip > 0 && p.distance.maxDriveMin > 0) { const f = trip / p.distance.maxDriveMin; r.distance = f <= 0.5 ? 10 : f <= 1 ? 8 : f <= 1.5 ? 5 : 2; }
+    const nice = (p.equipment && p.equipment.nice) || [];
+    if (nice.length) { const share = nice.filter(k => ((car.equip || {})[k] || 0) >= 0.6).length / nice.length; r.equip = Math.round(4 + 6 * share); }
+    return Object.keys(r).length ? r : null;
+  }
+  return { WEIGHT_KEYS, normMake, makeOf, fuelOf, gearboxOf, scoreCar, estimateRating, avoidHits, checkCriteria };
 });

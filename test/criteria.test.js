@@ -112,3 +112,43 @@ test("fix round 1: drivetrain matching", () => {
   assert.deepEqual(ids({ ...n47, engine: "2.0 diesel B47" }), []);
   assert.deepEqual(ids({ title: "BMW 320d Touring", model: "BMW 320d Touring", engine: "2.0 diesel" }), []);
 });
+
+test("estimateRating: mileage bands", () => {
+  const p = profile(); // maxKm 200000
+  const km = v => C.estimateRating({ km: v }, p).km;
+  assert.equal(km(140000), 9); assert.equal(km(170000), 7); assert.equal(km(200000), 5); assert.equal(km(200001), 3);
+});
+
+test("estimateRating: price bands", () => {
+  const p = profile(); // maxPrice 10000, negotiableUpTo 10500
+  const price = v => C.estimateRating({ price: v }, p).price;
+  assert.equal(price(8500), 9); assert.equal(price(10000), 7); assert.equal(price(10500), 5); assert.equal(price(10501), 2);
+});
+
+test("estimateRating: distance bands, by car and by transit", () => {
+  const p = profile(); // maxDriveMin 40
+  const dist = (c, q = p) => C.estimateRating(c, q).distance;
+  assert.equal(dist({ driveMin: 20 }), 10); assert.equal(dist({ driveMin: 40 }), 8); assert.equal(dist({ driveMin: 60 }), 5); assert.equal(dist({ driveMin: 61 }), 2);
+  const t = profile(); t.distance.preferTransit = true;
+  assert.equal(dist({ driveMin: 20, transitMin: 61 }, t), 2);
+});
+
+test("estimateRating: distance is omitted when the trip time is unknown", () => {
+  const p = profile();
+  assert.ok(!("distance" in C.estimateRating({ price: 9000, driveMin: null }, p)));
+  const t = profile(); t.distance.preferTransit = true;
+  assert.ok(!("distance" in C.estimateRating({ price: 9000, driveMin: 20 }, t)));
+});
+
+test("estimateRating: equipment share and omitted parts", () => {
+  const p = profile(); p.equipment.nice = ["carplay", "camera", "acc", "navi", "seatheat"];
+  const eq = e => C.estimateRating({ equip: e }, p).equip;
+  assert.equal(eq({}), 4);
+  assert.equal(eq({ carplay: 1, camera: 0.6, acc: 0.5 }), 6); // 2 of 5 count
+  assert.equal(eq({ carplay: 1, camera: 1, acc: 1, navi: 1, seatheat: 1 }), 10);
+  const r = C.estimateRating({ ...golf, equip: {} }, p);
+  assert.deepEqual(Object.keys(r).sort(), ["distance", "equip", "km", "price"]);
+  assert.equal(C.scoreCar({ rating: r }, p.weights), Math.round((7 * 2 + 7 * 1 + 8 * 1.5 + 4 * 1) / 5.5 * 10)); // km 0.8 → 7, price ≤ max → 7, 30 of 40 min → 8
+  p.equipment.nice = [];
+  assert.equal(C.estimateRating({}, p), null);
+});
