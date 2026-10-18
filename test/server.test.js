@@ -3,6 +3,7 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 const { start } = require("./helpers");
+const { defaultProfile } = require("../lib/profile");
 
 const json = (h = {}) => ({ ...h, "Content-Type": "application/json" });
 
@@ -73,5 +74,35 @@ test("a failing save answers 500 and the server keeps running", async () => {
     const sync = await fetch(s.base + "/api/sync", { method: "POST", headers: s.sync, body: JSON.stringify({ seen: {}, complete: false }) });
     assert.equal(sync.status, 500);
     assert.equal((await fetch(s.base + "/api/meta", { headers: s.auth })).status, 200);
+  } finally { await s.close(); }
+});
+
+test("profile: 404 on a fresh copy, validated PUT, round trip", async () => {
+  const s = await start();
+  try {
+    assert.equal((await fetch(s.base + "/api/profile", { headers: s.auth })).status, 404);
+    const bad = await fetch(s.base + "/api/profile", { method: "PUT", headers: json(s.auth), body: JSON.stringify({ name: "x" }) });
+    assert.equal(bad.status, 400);
+    assert.ok((await bad.json()).details.length > 0);
+    const p = defaultProfile(); p.name = "Our estate hunt";
+    assert.equal((await fetch(s.base + "/api/profile", { method: "PUT", headers: json(s.auth), body: JSON.stringify(p) })).status, 200);
+    assert.equal((await (await fetch(s.base + "/api/profile", { headers: s.auth })).json()).name, "Our estate hunt");
+    assert.equal(JSON.parse(fs.readFileSync(path.join(s.dir, "profile.json"), "utf8")).name, "Our estate hunt");
+    assert.equal((await fetch(s.base + "/api/profile", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(p) })).status, 401);
+  } finally { await s.close(); }
+});
+
+test("photos upload to DATA_DIR/img and are served from /img", async () => {
+  const s = await start();
+  const jpeg = Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0, 0x10, 0x4a, 0x46, 0x49, 0x46, 0, 1, 0xff, 0xd9]);
+  try {
+    assert.equal((await fetch(s.base + "/api/img/a-1.jpg", { method: "PUT", headers: { ...s.auth, "Content-Type": "image/jpeg" }, body: jpeg })).status, 401);
+    assert.equal((await fetch(s.base + "/api/img/..%2Fx.jpg", { method: "PUT", headers: { ...s.sync, "Content-Type": "image/jpeg" }, body: jpeg })).status, 400);
+    const ok = await fetch(s.base + "/api/img/a-1.jpg", { method: "PUT", headers: { ...s.sync, "Content-Type": "image/jpeg" }, body: jpeg });
+    assert.equal(ok.status, 200);
+    assert.equal((await ok.json()).path, "img/a-1.jpg");
+    const got = await fetch(s.base + "/img/a-1.jpg", { headers: s.auth });
+    assert.equal(got.status, 200);
+    assert.deepEqual(Buffer.from(await got.arrayBuffer()), jpeg);
   } finally { await s.close(); }
 });

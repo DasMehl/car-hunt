@@ -4,6 +4,7 @@ const fs = require("fs");
 const path = require("path");
 const crypto = require("crypto");
 const { readJson, writeJsonAtomic } = require("./lib/store");
+const { validateProfile } = require("./lib/profile");
 
 const STATUSES = ["candidate", "contacted", "replied", "call", "viewing", "declined", "dropped", "bought"];
 const LISTING_FIELDS = ["title", "shortName", "displayTitle", "make", "model", "fuel", "engine", "facelift", "variant", "trim", "colour", "price", "negotiable", "km", "regMonth", "regYear", "hp", "gearbox", "dsgType", "hu", "owners", "serviceHistory", "timingBelt", "dsgOil", "docsReview", "carplay", "carplayStatus", "camera", "location", "city", "distanceKm", "airKm", "roadKm", "driveMin", "transitMin", "transitCheckedAt", "transitSource", "transitDestination", "transitApproximate", "lat", "lon", "bahnUrl", "mapsUrl", "sellerName", "sellerType", "phone", "url", "kleinanzeigenUrl", "photos", "verdict", "pros", "cons", "questions", "i18n", "equip", "score", "rating", "replyAssessment", "visit", "order", "addedAt", "lastSeenAt", "priceHistory", "gone"];
@@ -70,6 +71,26 @@ function createApp(options = {}) {
 
   app.get("/api/cars", (req, res) => res.json({ cars: state.cars, updatedAt: new Date().toISOString() }));
   app.get("/api/meta", (req, res) => res.json(state.meta));
+
+  app.get("/api/profile", (req, res) => state.profile ? res.json(state.profile) : res.status(404).json({ error: "no profile" }));
+
+  app.put("/api/profile", async (req, res) => {
+    const { errors, value } = validateProfile(req.body);
+    if (errors.length) return res.status(400).json({ error: "invalid profile", details: errors });
+    state.profile = value;
+    try { await writeJsonAtomic(files.profile, value); res.json({ ok: true, profile: value }); }
+    catch (e) { res.status(500).json({ error: "save failed" }); }
+  });
+
+  app.put("/api/img/:name", requireKey, express.raw({ type: ["image/jpeg", "image/png", "image/webp"], limit: "5mb" }), async (req, res) => {
+    const name = req.params.name;
+    if (!/^[a-z0-9][a-z0-9-]{0,80}\.(jpg|png|webp)$/.test(name)) return res.status(400).json({ error: "invalid name" });
+    if (!Buffer.isBuffer(req.body) || !req.body.length) return res.status(400).json({ error: "image body expected" });
+    const file = path.join(dataDir, "img", name);
+    const tmp = file + ".tmp";
+    try { await fs.promises.writeFile(tmp, req.body); await fs.promises.rename(tmp, file); res.json({ ok: true, path: "img/" + name }); }
+    catch (e) { res.status(500).json({ error: "save failed" }); }
+  });
 
   app.patch("/api/cars/:id", async (req, res) => {
     const c = state.cars[req.params.id];
