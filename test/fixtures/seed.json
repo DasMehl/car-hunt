@@ -1,0 +1,1 @@
+{ "snapshotAt": "2026-01-01", "cars": { "example-car": { "title": "Example Estate", "price": 9500, "km": 120000, "regYear": 2017, "regMonth": 3, "status": "candidate", "messages": [] } } }

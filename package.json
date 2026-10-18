@@ -1,0 +1,10 @@
+{
+  "name": "car-hunt",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Used-car tracker you run yourself",
+  "main": "server.js",
+  "scripts": { "start": "node server.js", "test": "node --test" },
+  "engines": { "node": ">=18" },
+  "dependencies": { "express": "^4.21.2" }
+}
