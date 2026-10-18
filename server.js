@@ -103,8 +103,6 @@ function createApp(options = {}) {
     if (!["automatic", "manual"].includes(b.gearbox)) errors.push("gearbox: automatic or manual expected");
     if (errors.length) return res.status(400).json({ error: "invalid car", details: errors });
 
-    let id = slug(b.title + " " + b.town) || "car";
-    if (state.cars[id]) { let i = 2; while (state.cars[`${id}-${i}`]) i++; id = `${id}-${i}`; }
     const d = today();
     const car = {
       title: b.title.trim(), displayTitle: `${b.title.trim()} · ${b.regYear}`, model: b.title.trim(), fuel: b.fuel,
@@ -124,9 +122,19 @@ function createApp(options = {}) {
         }
       }
     } catch (e) { /* distance stays empty */ }
+    // Id is chosen and stored synchronously, after the last await, so concurrent adds cannot share one.
+    let id = slug(b.title + " " + b.town) || "car";
+    if (state.cars[id]) { let i = 2; while (state.cars[`${id}-${i}`]) i++; id = `${id}-${i}`; }
     state.cars[id] = car;
-    state.meta.log.unshift({ date: d, type: "new", id, text: car.displayTitle, price: car.price });
-    try { await persist(); } catch (e) { return res.status(500).json({ error: "save failed" }); }
+    const entry = { date: d, type: "new", id, text: car.displayTitle, price: car.price };
+    state.meta.log.unshift(entry);
+    try { await persist(); }
+    catch (e) {
+      delete state.cars[id];
+      const at = state.meta.log.indexOf(entry);
+      if (at >= 0) state.meta.log.splice(at, 1);
+      return res.status(500).json({ error: "save failed" });
+    }
     res.status(201).json({ ok: true, id, car });
   });
 

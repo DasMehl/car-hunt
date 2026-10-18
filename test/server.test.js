@@ -149,3 +149,35 @@ test("geocode endpoint", async () => {
     assert.equal((await r.json()).lat, 51.4556);
   } finally { await s.close(); }
 });
+
+test("concurrent manual adds of the same car get different ids", async () => {
+  const slowGeo = async url => { await new Promise(r => setTimeout(r, 50)); return geoFetch(url); };
+  const s = await start({ fetchImpl: slowGeo });
+  try {
+    const post = () => fetch(s.base + "/api/cars", { method: "POST", headers: json(s.auth), body: JSON.stringify(newCar) });
+    const [a, b] = await Promise.all([post(), post()]);
+    assert.equal(a.status, 201);
+    assert.equal(b.status, 201);
+    const ida = (await a.json()).id, idb = (await b.json()).id;
+    assert.notEqual(ida, idb);
+    const cars = (await (await fetch(s.base + "/api/cars", { headers: s.auth })).json()).cars;
+    assert.ok(cars[ida]);
+    assert.ok(cars[idb]);
+    assert.equal(Object.keys(cars).length, 2);
+  } finally { await s.close(); }
+});
+
+test("a failed manual-add save answers 500 and leaves no car or log entry behind", async () => {
+  const s = await start({ fetchImpl: geoFetch });
+  try {
+    fs.rmSync(path.join(s.dir, "cars.json"));
+    fs.mkdirSync(path.join(s.dir, "cars.json")); // renaming a file onto a directory fails
+    const r = await fetch(s.base + "/api/cars", { method: "POST", headers: json(s.auth), body: JSON.stringify(newCar) });
+    assert.equal(r.status, 500);
+    assert.deepEqual(await r.json(), { error: "save failed" });
+    const cars = (await (await fetch(s.base + "/api/cars", { headers: s.auth })).json()).cars;
+    assert.deepEqual(cars, {});
+    const meta = await (await fetch(s.base + "/api/meta", { headers: s.auth })).json();
+    assert.equal(meta.log.length, 0);
+  } finally { await s.close(); }
+});
