@@ -13,6 +13,16 @@ Each person runs their own copy. On first launch a setup wizard asks for your cr
 
 Cars come in two ways: an "Add a car" form on the site, and an optional Claude Code routine that searches mobile.de with your criteria, rates new listings, reads seller replies and, if you allow it, sends a short first message to sellers in your name.
 
-## Status
+## Run your own copy
 
-In development. The design is in [docs/design.md](docs/design.md). Deployment instructions follow when the first version is ready.
+1. Fork this repository on GitHub.
+2. Create a Railway project from your fork and add a volume mounted at `/data`.
+3. Set these variables on the service: `DATA_DIR=/data`, `SITE_PASSWORD` (anyone with it can see and edit your hunt), `SYNC_KEY` (a long random string; only the routine needs it).
+4. Deploy, open the site, enter the password with any user name and complete the setup wizard.
+5. Add cars with "Add a car", or install the Claude routine: see [routine/README.md](routine/README.md).
+
+Run locally with `npm install && DATA_DIR=./data SYNC_KEY=dev npm start` and open http://localhost:3000.
+
+## Tests
+
+`npm test`
