@@ -882,7 +882,7 @@ body.setup .wrap{display:none}
     head.append(ph);
     const f = el("div", "dfacts");
     const tr = el("div", "travel");
-    const t1 = el("div"); t1.innerHTML = `<b>${esc(tripText(c))}</b>${tripMin(c) ? " · " + esc(T.transitApprox) : ""}`; tr.append(t1);
+    const t1 = el("div"); t1.innerHTML = `<b>${esc(tripText(c))}</b>${tripMin(c) ? esc(T.transitApprox.charAt(0).toUpperCase() + T.transitApprox.slice(1)) : ""}`; tr.append(t1);
     const t2 = el("div"); t2.innerHTML = `<b>${esc(c.location || c.city || "")}</b>${esc(P.distance.preferTransit ? (c.transitCheckedAt ? T.transitNote : T.transitUnknown) : (driveMinutes(c) ? T.driveNote : T.tripUnknown))}`; tr.append(t2);
     if (tf(c, "sellerName") || tf(c, "sellerType") || c.phone) { const t3 = el("div"); t3.innerHTML = `<b>${esc(tf(c, "sellerName"))}</b>${esc(tf(c, "sellerType"))}${c.phone ? ` · ${T.phone} <span class="phone">${esc(c.phone)}</span>` : ""}`; tr.append(t3); }
     f.append(tr);
