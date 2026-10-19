@@ -207,6 +207,8 @@ aside select { width: 100%; background: var(--surface); border: 1px solid var(--
 .links { display: flex; flex-wrap: wrap; gap: 8px; }
 .links a, .btn { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; padding: 7px 12px; border-radius: 7px; border: 1px solid var(--line); background: var(--surface); text-decoration: none; cursor: pointer; color: var(--fg); }
 .links a.primary, .btn.primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+.btn.danger { color: var(--bad); border-color: var(--bad); background: var(--surface); }
+.caractions { display: flex; flex-wrap: wrap; gap: 8px; padding-top: 10px; border-top: 1px solid var(--line); margin-top: 4px; }
 .phone { font-variant-numeric: tabular-nums; user-select: all; }
 .dbody { border-top: 1px solid var(--line); display: grid; grid-template-columns: 1fr 1fr; }
 @media (max-width: 760px) { .dbody { grid-template-columns: 1fr; } }
@@ -428,7 +430,7 @@ body.setup .wrap{display:none}
       rating: { km: "Mileage & age", docs: "Maintenance records", gearbox: "Gearbox risk", seller: "Seller & warranty", price: "Price", distance: "Visit by transit", distanceCar: "Distance by car", equip: "Equipment" },
       statusL: "Status", next: "Next step", nextPh: "e.g. call after 13:00", notes: "My notes", notesPh: "Impressions, offers, things to check at the viewing…",
       logReply: "Log a reply", cancel: "Cancel", fromL: "From", via: "Via", vias: ["Phone", "mobile.de", "Email", "WhatsApp", "In person"], said: "What they said", add: "Add to conversation",
-      saved: "Saved", saveFail: "Could not save", pick: "Shortlist", picked: "Shortlisted", priceHist: "Price history",
+      editCar: "Edit details", deleteCar: "Delete car", confirmDelete: t => `Delete “${t}”? This removes the car, its notes and messages, and cannot be undone.`, saved: "Saved", saveFail: "Could not save", pick: "Shortlist", picked: "Shortlisted", priceHist: "Price history",
       cmp: "Side by side", cols: ["Car", "Score", "Price", "km", "km/yr", "Year", "hp", "Gearbox", "Transit", "Seller", "Belt", "CarPlay", "Camera", "Status"] },
     de: { locale: "de-DE",
       sub: (n, d, h) => `${n} ${n === 1 ? "Auto" : "Autos"} im Blick${d ? " · letzte Inseratsprüfung " + d : ""}${h ? " · ab " + h : ""}`,
@@ -453,7 +455,7 @@ body.setup .wrap{display:none}
       rating: { km: "Laufleistung & Alter", docs: "Wartungsnachweise", gearbox: "Getrieberisiko", seller: "Verkäufer & Gewährleistung", price: "Preis", distance: "Besuch mit ÖPNV", distanceCar: "Entfernung mit dem Auto", equip: "Ausstattung" },
       statusL: "Status", next: "Nächster Schritt", nextPh: "z. B. ab 13 Uhr anrufen", notes: "Meine Notizen", notesPh: "Eindrücke, Angebote, was bei der Besichtigung zu prüfen ist…",
       logReply: "Antwort eintragen", cancel: "Abbrechen", fromL: "Von", via: "Über", vias: ["Telefon", "mobile.de", "E-Mail", "WhatsApp", "Persönlich"], said: "Was gesagt wurde", add: "Zum Verlauf hinzufügen",
-      saved: "Gespeichert", saveFail: "Speichern fehlgeschlagen", pick: "Vormerken", picked: "Vorgemerkt", priceHist: "Preisverlauf",
+      editCar: "Angaben bearbeiten", deleteCar: "Auto löschen", confirmDelete: t => `„${t}“ löschen? Das entfernt das Auto, seine Notizen und Nachrichten und lässt sich nicht rückgängig machen.`, saved: "Gespeichert", saveFail: "Speichern fehlgeschlagen", pick: "Vormerken", picked: "Vorgemerkt", priceHist: "Preisverlauf",
       cmp: "Im Vergleich", cols: ["Auto", "Punkte", "Preis", "km", "km/Jahr", "Baujahr", "PS", "Getriebe", "ÖPNV", "Verkäufer", "Zahnriemen", "CarPlay", "Kamera", "Status"] },
     pt: { locale: "pt-BR",
       sub: (n, d, h) => `${n} ${n === 1 ? "carro acompanhado" : "carros acompanhados"}${d ? " · última verificação dos anúncios " + d : ""}${h ? " · a partir de " + h : ""}`,
@@ -478,7 +480,7 @@ body.setup .wrap{display:none}
       rating: { km: "Quilometragem e idade", docs: "Histórico de manutenção", gearbox: "Risco do câmbio", seller: "Vendedor e garantia", price: "Preço", distance: "Visita de transporte público", distanceCar: "Distância de carro", equip: "Equipamentos" },
       statusL: "Status", next: "Próximo passo", nextPh: "ex.: ligar depois das 13h", notes: "Minhas anotações", notesPh: "Impressões, ofertas, o que verificar na visita…",
       logReply: "Registrar resposta", cancel: "Cancelar", fromL: "De", via: "Por", vias: ["Telefone", "mobile.de", "E-mail", "WhatsApp", "Pessoalmente"], said: "O que disseram", add: "Adicionar à conversa",
-      saved: "Salvo", saveFail: "Não foi possível salvar", pick: "Salvar", picked: "Salvo", priceHist: "Histórico de preço",
+      editCar: "Editar dados", deleteCar: "Excluir carro", confirmDelete: t => `Excluir “${t}”? Isso remove o carro, suas anotações e mensagens, e não pode ser desfeito.`, saved: "Salvo", saveFail: "Não foi possível salvar", pick: "Salvar", picked: "Salvo", priceHist: "Histórico de preço",
       cmp: "Lado a lado", cols: ["Carro", "Pontos", "Preço", "km", "km/ano", "Ano", "cv", "Câmbio", "Viagem", "Vendedor", "Correia", "CarPlay", "Câmera", "Status"] }
   };
   const COST_I18N = {
@@ -923,7 +925,12 @@ body.setup .wrap{display:none}
     const tW = el("div"); const txl = el("label", null, T.said); txl.htmlFor = "reply-" + c.id; const tx = el("textarea"); tx.id = "reply-" + c.id; tW.append(txl, tx);
     const sb = el("button", "btn primary", T.add); sb.type = "button"; sb.onclick = () => { if (!tx.value.trim()) { tx.focus(); return; } const patch = { messages: [...(c.messages || []), { date: new Date().toISOString(), dir: "in", from: fi.value || c.sellerName, via: vi.value, text: tx.value.trim() }] }; if (c.status === "contacted") patch.status = "replied"; openReply[c.id] = false; save(c.id, patch, note); };
     form.append(fr, tW, sb); rb.onclick = () => { openReply[c.id] = !openReply[c.id]; form.classList.toggle("open", openReply[c.id]); rb.textContent = openReply[c.id] ? T.cancel : T.logReply; if (openReply[c.id]) tx.focus(); };
-    const note = el("div", "saved"); ctr.append(rb, form, note); right.append(ctr); body.append(right); d.append(body);
+    const note = el("div", "saved");
+    const acts = el("div", "caractions");
+    const eb = el("button", "btn", T.editCar); eb.type = "button"; eb.onclick = () => Setup.editCar({ car: c, lang, onSaved: () => { expanded.add(c.id); load(); } });
+    const db = el("button", "btn danger", T.deleteCar); db.type = "button"; db.onclick = () => removeCar(c, note);
+    acts.append(eb, db);
+    ctr.append(rb, form, note, acts); right.append(ctr); body.append(right); d.append(body);
     return d;
   }
   function renderList(list) {
@@ -962,6 +969,18 @@ body.setup .wrap{display:none}
   function save(id, patch, noteEl) {
     saving = saving.then(() => fetch("/api/cars/" + encodeURIComponent(id), { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(patch) }).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }))
       .then(j => { const i = cars.findIndex(c => c.id === id); if (i >= 0) cars[i] = toList({ [id]: j.car })[0]; render(); const n = noteEl && (document.querySelector(`#car-${CSS.escape(id)} .saved`) || noteEl); if (n) { n.textContent = T.saved; setTimeout(() => n.textContent = "", 1500); } })
+      .catch(e => { if (noteEl) noteEl.textContent = T.saveFail; });
+  }
+
+  function removeCar(c, noteEl) {
+    if (!confirm(T.confirmDelete(c.displayTitle || c.title || c.id))) return;
+    saving = saving.then(() => fetch("/api/cars/" + encodeURIComponent(c.id), { method: "DELETE" }).then(r => { if (!r.ok) throw new Error(r.status); }))
+      .then(() => {
+        expanded.delete(c.id); delete openReply[c.id]; delete openPhoto[c.id];
+        if (costSelected.includes(c.id)) { costSelected = costSelected.filter(x => x !== c.id); saveCosts(); }
+        if (location.hash === "#car-" + c.id) history.replaceState(null, "", location.pathname + location.search);
+        return load();
+      })
       .catch(e => { if (noteEl) noteEl.textContent = T.saveFail; });
   }
 
