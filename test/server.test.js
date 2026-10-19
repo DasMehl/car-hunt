@@ -230,6 +230,9 @@ test("manual add without regMonth or hp stores null", async () => {
     const { car } = await (await fetch(s.base + "/api/cars", { method: "POST", headers: json(s.auth), body: JSON.stringify(newCar) })).json();
     assert.equal(car.regMonth, null);
     assert.equal(car.hp, null);
+    assert.equal(car.negotiable, false);
+    const neg = await (await fetch(s.base + "/api/cars", { method: "POST", headers: json(s.auth), body: JSON.stringify({ ...newCar, negotiable: true }) })).json();
+    assert.equal(neg.car.negotiable, true);
   } finally { await s.close(); }
 });
 

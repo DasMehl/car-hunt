@@ -136,7 +136,7 @@ function createApp(options = {}) {
     const d = today();
     const car = {
       title: b.title.trim(), displayTitle: `${b.title.trim()} · ${b.regYear}`, model: b.title.trim(), fuel: b.fuel,
-      gearbox: b.gearbox === "automatic" ? "Automatic" : "Manual", price: b.price, km: b.km, regYear: b.regYear, regMonth: b.regMonth ?? null,
+      gearbox: b.gearbox === "automatic" ? "Automatic" : "Manual", price: b.price, negotiable: b.negotiable === true, km: b.km, regYear: b.regYear, regMonth: b.regMonth ?? null,
       hp: b.hp ?? null, location: b.town.trim(), city: b.town.trim(), url: b.url, photos: [], source: "manual",
       status: "candidate", pick: false, notes: b.notes || "", nextStep: "", messages: [], addedAt: d, lastSeenAt: d, priceHistory: [{ date: d, price: b.price }]
     };

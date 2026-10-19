@@ -22,7 +22,7 @@
       eq: { carplay: "CarPlay", camera: "Rear camera", acc: "Adaptive cruise", ahk: "Tow hitch", led: "LED/Xenon", pano: "Panorama roof", navi: "Navigation", seatheat: "Heated seats" },
       w: { km: "Mileage & age", docs: "Maintenance records", gearbox: "Gearbox risk", seller: "Seller & warranty", price: "Price", distance: "Distance", equip: "Equipment" },
       lang: { en: "English", de: "Deutsch", pt: "Português" },
-      add: "Add a car", url: "Listing link", title: "Make and model", price: "Price (€)", km: "Mileage (km)", year: "First registration year", town: "Postcode and town", notes: "Notes", hp: "Power (hp, optional)", added: "Car added", homeNeeded: "Please find your home address first.", loadFail: "Could not load the drivetrain list; you can still save.", needNumber: "Please enter a number for:", netFail: "Could not reach the server:", customOn: "Avoid"
+      editCar: "Edit car", saveChanges: "Save changes", month: "Month (optional)", negotiable: "Price is negotiable", add: "Add a car", url: "Listing link", title: "Make and model", price: "Price (€)", km: "Mileage (km)", year: "First registration year", town: "Postcode and town", notes: "Notes", hp: "Power (hp, optional)", added: "Car added", homeNeeded: "Please find your home address first.", loadFail: "Could not load the drivetrain list; you can still save.", needNumber: "Please enter a number for:", netFail: "Could not reach the server:", customOn: "Avoid"
     },
     de: {
       wizard: "Autosuche einrichten", settings: "Einstellungen", next: "Weiter", back: "Zurück", save: "Speichern", cancel: "Abbrechen", finish: "Los geht’s",
@@ -41,7 +41,7 @@
       eq: { carplay: "CarPlay", camera: "Rückfahrkamera", acc: "Abstandstempomat", ahk: "Anhängerkupplung", led: "LED/Xenon", pano: "Panoramadach", navi: "Navi", seatheat: "Sitzheizung" },
       w: { km: "Laufleistung & Alter", docs: "Wartungsnachweise", gearbox: "Getrieberisiko", seller: "Verkäufer & Gewährleistung", price: "Preis", distance: "Entfernung", equip: "Ausstattung" },
       lang: { en: "English", de: "Deutsch", pt: "Português" },
-      add: "Auto hinzufügen", url: "Link zum Inserat", title: "Marke und Modell", price: "Preis (€)", km: "Kilometerstand", year: "Erstzulassung (Jahr)", town: "PLZ und Ort", notes: "Notizen", hp: "Leistung (PS, optional)", added: "Auto hinzugefügt", homeNeeded: "Bitte zuerst die Wohnadresse suchen.", loadFail: "Die Liste der Antriebe konnte nicht geladen werden; Speichern geht trotzdem.", needNumber: "Bitte eine Zahl eingeben für:", netFail: "Server nicht erreichbar:", customOn: "Meiden"
+      editCar: "Auto bearbeiten", saveChanges: "Änderungen speichern", month: "Monat (optional)", negotiable: "Preis verhandelbar", add: "Auto hinzufügen", url: "Link zum Inserat", title: "Marke und Modell", price: "Preis (€)", km: "Kilometerstand", year: "Erstzulassung (Jahr)", town: "PLZ und Ort", notes: "Notizen", hp: "Leistung (PS, optional)", added: "Auto hinzugefügt", homeNeeded: "Bitte zuerst die Wohnadresse suchen.", loadFail: "Die Liste der Antriebe konnte nicht geladen werden; Speichern geht trotzdem.", needNumber: "Bitte eine Zahl eingeben für:", netFail: "Server nicht erreichbar:", customOn: "Meiden"
     },
     pt: {
       wizard: "Configure sua busca", settings: "Configurações", next: "Próximo", back: "Voltar", save: "Salvar", cancel: "Cancelar", finish: "Começar",
@@ -60,7 +60,7 @@
       eq: { carplay: "CarPlay", camera: "Câmera de ré", acc: "Piloto adaptativo", ahk: "Engate", led: "LED/Xenon", pano: "Teto panorâmico", navi: "Navegação", seatheat: "Bancos aquecidos" },
       w: { km: "Quilometragem e idade", docs: "Histórico de manutenção", gearbox: "Risco do câmbio", seller: "Vendedor e garantia", price: "Preço", distance: "Distância", equip: "Equipamentos" },
       lang: { en: "English", de: "Deutsch", pt: "Português" },
-      add: "Adicionar carro", url: "Link do anúncio", title: "Marca e modelo", price: "Preço (€)", km: "Quilometragem (km)", year: "Ano do primeiro registro", town: "CEP e cidade", notes: "Anotações", hp: "Potência (cv, opcional)", added: "Carro adicionado", homeNeeded: "Busque primeiro o endereço de casa.", loadFail: "Não foi possível carregar a lista de motores; ainda dá para salvar.", needNumber: "Informe um número para:", netFail: "Não foi possível falar com o servidor:", customOn: "Evitar"
+      editCar: "Editar carro", saveChanges: "Salvar alterações", month: "Mês (opcional)", negotiable: "Preço negociável", add: "Adicionar carro", url: "Link do anúncio", title: "Marca e modelo", price: "Preço (€)", km: "Quilometragem (km)", year: "Ano do primeiro registro", town: "CEP e cidade", notes: "Anotações", hp: "Potência (cv, opcional)", added: "Carro adicionado", homeNeeded: "Busque primeiro o endereço de casa.", loadFail: "Não foi possível carregar a lista de motores; ainda dá para salvar.", needNumber: "Informe um número para:", netFail: "Não foi possível falar com o servidor:", customOn: "Evitar"
     }
   };
 
@@ -258,34 +258,59 @@
     show(); dlg.showModal();
   }
 
-  function addCar({ lang, onSaved }) {
-    const t = L[lang] || L.en;
-    const f = { url: el("input", { type: "url", required: true }), title: el("input", { type: "text", required: true }), price: el("input", { type: "number", min: 0, required: true }), km: el("input", { type: "number", min: 0, required: true }), regYear: el("input", { type: "number", min: 1980, max: 2100, required: true }), hp: el("input", { type: "number", min: 1 }),
-      fuel: el("select", {}, FUELS.map(x => el("option", { value: x, text: t.fuel[x] }))), gearbox: el("select", {}, ["automatic", "manual"].map(x => el("option", { value: x, text: t.gb[x] }))), town: el("input", { type: "text", required: true }), notes: el("textarea", { rows: 3 }) };
+  // The add-car and edit-car dialogs share this form. car prefills it and switches it to editing:
+  // no notes field (they live on the car card) and only changed fields are sent.
+  function carDialog({ lang, car, onSaved }) {
+    const t = L[lang] || L.en, editing = !!car;
+    const f = { url: el("input", { type: "url", required: true }), title: el("input", { type: "text", required: true }), price: el("input", { type: "number", min: 0, required: true }), km: el("input", { type: "number", min: 0, required: true }), regYear: el("input", { type: "number", min: 1980, max: 2100, required: true }), regMonth: el("input", { type: "number", min: 1, max: 12 }), hp: el("input", { type: "number", min: 1 }),
+      fuel: el("select", {}, FUELS.map(x => el("option", { value: x, text: t.fuel[x] }))), gearbox: el("select", {}, ["automatic", "manual"].map(x => el("option", { value: x, text: t.gb[x] }))), town: el("input", { type: "text", required: true }), negotiable: el("input", { type: "checkbox" }), notes: el("textarea", { rows: 3 }) };
+    // Form values in the shape the API takes; optional numbers are null when empty.
+    const num = i => i.value.trim() === "" ? null : Number(i.value);
+    const read = () => ({ url: f.url.value.trim(), title: f.title.value.trim(), price: num(f.price), km: num(f.km), regYear: num(f.regYear), regMonth: num(f.regMonth), hp: num(f.hp), fuel: f.fuel.value, gearbox: f.gearbox.value, town: f.town.value.trim(), negotiable: f.negotiable.checked });
+    let before = null;
+    if (editing) {
+      const v = { url: car.url, title: car.title, price: car.price, km: car.km, regYear: car.regYear, regMonth: car.regMonth, hp: car.hp, town: car.location || car.city };
+      for (const [k, x] of Object.entries(v)) f[k].value = x ?? "";
+      const fuel = Criteria.fuelOf(car), gb = Criteria.gearboxOf(car);
+      if (fuel) f.fuel.value = fuel;
+      if (gb) f.gearbox.value = gb;
+      f.negotiable.checked = !!car.negotiable;
+      before = read();
+    }
     const err = el("p", { class: "err" });
     const dlg = el("dialog", { class: "sx" });
     const form = el("form", { method: "dialog" },
-      el("div", { class: "sxhead" }, el("h2", { text: t.add })),
+      el("div", { class: "sxhead" }, el("h2", { text: editing ? t.editCar : t.add })),
       el("div", { class: "sxbody" }, el("label", {}, t.url, f.url), el("label", {}, t.title, f.title),
-      el("div", { class: "frow" }, el("label", {}, t.price, f.price), el("label", {}, t.km, f.km), el("label", {}, t.year, f.regYear), el("label", {}, t.hp, f.hp)),
+      el("div", { class: "frow" }, el("label", {}, t.price, f.price), el("label", {}, t.km, f.km), el("label", {}, t.hp, f.hp)),
+      el("div", { class: "frow" }, el("label", {}, t.year, f.regYear), el("label", {}, t.month, f.regMonth)),
       el("div", { class: "frow" }, el("label", {}, t.fuels, f.fuel), el("label", {}, t.gearbox, f.gearbox), el("label", {}, t.town, f.town)),
-      el("label", {}, t.notes, f.notes)),
-      el("div", { class: "sxfoot" }, err, el("div", { class: "bar" }, el("button", { type: "button", text: t.cancel, onclick: () => dlg.close() }), el("span"), el("button", { type: "submit", class: "primary", text: t.add }))));
+      el("div", { class: "opts" }, el("label", {}, f.negotiable, t.negotiable)),
+      editing ? null : el("label", {}, t.notes, f.notes)),
+      el("div", { class: "sxfoot" }, err, el("div", { class: "bar" }, el("button", { type: "button", text: t.cancel, onclick: () => dlg.close() }), el("span"), el("button", { type: "submit", class: "primary", text: editing ? t.saveChanges : t.add }))));
     form.onsubmit = async e => {
       e.preventDefault();
-      const body = { url: f.url.value.trim(), title: f.title.value.trim(), price: Number(f.price.value), km: Number(f.km.value), regYear: Number(f.regYear.value), fuel: f.fuel.value, gearbox: f.gearbox.value, town: f.town.value.trim() };
-      if (f.hp.value) body.hp = Number(f.hp.value);
-      if (f.notes.value.trim()) body.notes = f.notes.value.trim();
+      const now = read();
+      let body;
+      if (editing) body = Object.fromEntries(Object.entries(now).filter(([k, v]) => v !== before[k]));
+      else {
+        body = Object.fromEntries(Object.entries(now).filter(([k, v]) => v != null && (k !== "negotiable" || v)));
+        if (f.notes.value.trim()) body.notes = f.notes.value.trim();
+      }
+      if (editing && !Object.keys(body).length) { dlg.close(); return; }
       const btn = form.querySelector(".bar .primary"); if (btn.disabled) return; btn.disabled = true;
       let r;
-      try { r = await fetch("/api/cars", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }); }
+      const req = editing ? ["/api/cars/" + encodeURIComponent(car.id) + "/listing", "PATCH"] : ["/api/cars", "POST"];
+      try { r = await fetch(req[0], { method: req[1], headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }); }
       catch (x) { err.textContent = `${t.netFail} ${x.message}`; return; }
       finally { btn.disabled = false; }
-      if (!r.ok) { const j = await r.json().catch(() => ({})); err.textContent = (j.details || [String(r.status)]).join("\n"); return; }
+      if (!r.ok) { const j = await r.json().catch(() => ({})); err.textContent = (j.details || [j.error || String(r.status)]).join("\n"); return; }
       dlg.close(); onSaved && onSaved();
     };
     dlg.append(form); document.body.append(dlg); dlg.addEventListener("close", () => dlg.remove()); dlg.showModal();
   }
+  const addCar = ({ lang, onSaved }) => carDialog({ lang, onSaved });
+  const editCar = ({ car, lang, onSaved }) => carDialog({ car, lang, onSaved });
 
-  window.Setup = { open, addCar };
+  window.Setup = { open, addCar, editCar };
 })();
